@@ -1,4 +1,5 @@
 import io
+import os
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
@@ -19,21 +20,24 @@ app = FastAPI(
     description="API inferensi AI untuk penilaian kualitas tingkat sangrai biji kopi Toraja (Kopita)."
 )
 
-# 1. Konfigurasi Model & Kelas (Sesuaikan dengan dataset Anda: Dark, Green, Light, Medium)
+# 1. Konfigurasi Model & Kelas (Sesuaikan dengan dataset: Dark, Green, Light, Medium)
 CLASSES = ['Dark', 'Green', 'Light', 'Medium']
-DEVICE = torch.device('cpu') # Dipaksa berjalan di CPU agar sangat ringan di laptop Anda
+
+# Device komputasi: dibaca dari env (default: cpu)
+DEVICE_NAME = os.getenv("DEVICE", "cpu")
+DEVICE = torch.device(DEVICE_NAME)
 
 # Inisialisasi arsitektur MobileNetV3-Small
 model = models.mobilenet_v3_small()
 in_features: int = model.classifier[-1].in_features
 model.classifier[-1] = nn.Linear(in_features, len(CLASSES))
 
-# Memuat bobot hasil latihan dari Colab secara aman
-MODEL_PATH = "model/best_torajigrade_model.pth"
+# Memuat bobot hasil latihan secara aman (default: model/best_torajigrade_model.pth)
+MODEL_PATH = os.getenv("MODEL_PATH", "model/best_torajigrade_model.pth")
 try:
     model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
     model.eval()
-    print(f"✅ Model TorajiGrade berhasil dimuat dari {MODEL_PATH}!")
+    print(f"✅ Model TorajiGrade berhasil dimuat dari {MODEL_PATH} pada device {DEVICE}!")
 except Exception as e:
     print(f"❌ Gagal memuat model: {str(e)}")
 

@@ -10,17 +10,21 @@ Aturan modul ini (.rules.md Section 2 - Strict Environment Boundaries):
   - Hanya boleh melakukan HTTP request ke backend FastAPI.
 """
 
-from __future__ import annotations
-
+import os
 import time
 import requests
 from dataclasses import dataclass
 
-# URL backend FastAPI — ubah di sini jika port atau host berubah
-_BACKEND_URL: str = "http://127.0.0.1:8000"
+# URL backend FastAPI — dibaca dinamis dari environment variable
+# Lokal: http://127.0.0.1:8000 | Docker: http://backend:8000
+_BACKEND_URL: str = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
 _PREDICT_ENDPOINT: str = f"{_BACKEND_URL}/predict"
 _HEALTH_ENDPOINT: str  = f"{_BACKEND_URL}/"
-_REQUEST_TIMEOUT: int  = 30  # detik
+
+try:
+    _REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "30"))
+except ValueError:
+    _REQUEST_TIMEOUT = 30
 
 
 @dataclass(frozen=True)

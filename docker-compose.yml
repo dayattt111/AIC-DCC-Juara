@@ -20,19 +20,22 @@ services:
       uvicorn app.main:app
       --host 0.0.0.0
       --port 8000
-      --reload
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     volumes:
       # Mount model/ agar bobot model dapat dibaca saat runtime
       # tanpa perlu rebuild image setiap kali model diperbarui
       - ./model:/kopita/model:ro
-      # Mount app/ untuk hot-reload saat pengembangan lokal
-      - ./app:/kopita/app
+      # Mount app/ untuk kemudahan pengujian
+      - ./app:/kopita/app:ro
     working_dir: /kopita
     environment:
       - PYTHONUNBUFFERED=1
-    # Restart otomatis jika container crash (berguna saat demo)
+      - DEVICE=${DEVICE:-cpu}
+      - MODEL_PATH=${MODEL_PATH:-model/best_torajigrade_model.pth}
+      - APP_ENV=${APP_ENV:-production}
+    env_file:
+      - .env
     restart: on-failure
 
   # -----------------------------------------------------------
@@ -51,15 +54,19 @@ services:
       --server.headless true
       --browser.gatherUsageStats false
     ports:
-      - "8501:8501"
+      - "${FRONTEND_PORT:-8501}:8501"
     volumes:
       # Mount app/ saja — frontend TIDAK boleh mengakses model/
       # (lihat .rules.md Section 2: Strict Environment Boundaries)
-      - ./app:/kopita/app
+      - ./app:/kopita/app:ro
     working_dir: /kopita
     environment:
       - PYTHONUNBUFFERED=1
-    # Frontend menunggu backend siap sebelum start
+      # Di dalam jaringan internal Docker, frontend mengakses backend via hostname service 'backend'
+      - BACKEND_URL=http://backend:8000
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-30}
+    env_file:
+      - .env
     depends_on:
       - backend
     restart: on-failure

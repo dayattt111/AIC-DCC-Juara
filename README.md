@@ -27,12 +27,12 @@ Frontend Streamlit  :8501
       │  HTTP POST /predict (multipart/form-data)
       ▼
 Backend FastAPI     :8000
-      │  Preprocessing → MobileNetV3-Small → Softmax
+      │  Sanitasi Letterbox → MobileNetV3-Small → Softmax
       ▼
-JSON Response  {prediction, confidence, detail, rekomendasi_bisnis}
+JSON Response  {status, prediction, confidence, detail, rekomendasi_bisnis}
       │
       ▼
-Frontend Streamlit  (Tampilkan kartu hasil + rekomendasi UMKM)
+Frontend Streamlit  (Tampilkan Hasil Analisis, Telemetri Teknis, & Rekomendasi UMKM)
 ```
 
 ---
@@ -43,7 +43,9 @@ Frontend Streamlit  (Tampilkan kartu hasil + rekomendasi UMKM)
 002-Hackathon-AIC/
 ├── app/
 │   ├── main.py              # Backend FastAPI (Port 8000) — Inference Engine
-│   └── ui.py                # Frontend Streamlit (Port 8501) — Portal UI
+│   ├── ui.py                # Frontend Streamlit (Port 8501) — Portal UI
+│   ├── style.py             # UI Visual Engine (CSS & Komponen Kustom Kopita)
+│   └── api_client.py        # Modul Komunikasi HTTP ke Backend
 ├── model/
 │   ├── best_torajigrade_model.pth        # Bobot Model PyTorch (~6 MB)
 │   └── torajigrade_model_config.json     # Hyperparameter & metadata model
@@ -55,130 +57,123 @@ Frontend Streamlit  (Tampilkan kartu hasil + rekomendasi UMKM)
 │   ├── from_dataset_test/
 │   ├── from_public_image_out_of_dataset/
 │   └── from_camera_manual/
-├── profil_team/             # Profil anggota tim
+├── .env.example             # Template variabel lingkungan
+├── .env                     # Variabel lingkungan aktif
 ├── requirements.txt         # Dependensi Python (CPU-Only PyTorch)
 ├── Dockerfile               # Image Docker Python 3.12-slim
-└── docker-compose.yml       # Orkestrasi: backend + frontend
+└── docker-compose.yml       # Orkestrasi container: backend + frontend
 ```
 
 ---
 
-## 🚀 Cara Menjalankan (Lokal)
+## ⚙️ Konfigurasi Lingkungan (`.env`)
+
+Sebelum menjalankan aplikasi, pastikan berkas konfigurasi `.env` telah disiapkan:
+
+```bash
+# Salin template environment
+cp .env.example .env
+```
+
+Isi default berkas `.env`:
+```env
+# Backend Settings
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+DEVICE=cpu
+MODEL_PATH=model/best_torajigrade_model.pth
+APP_ENV=production
+
+# Frontend Settings
+BACKEND_URL=http://127.0.0.1:8000
+FRONTEND_PORT=8501
+REQUEST_TIMEOUT=30
+```
+
+---
+
+## 🐳 Cara Menjalankan dengan Docker Compose (Direkomendasikan)
+
+Pastikan Docker dan Docker Compose telah terpasang di sistem Anda.
+
+```bash
+# 1. Build dan jalankan seluruh container layanan
+docker compose up --build
+
+# 2. Buka di browser:
+#    - Frontend Streamlit : http://localhost:8501
+#    - Backend FastAPI    : http://localhost:8000
+#    - Swagger API Docs   : http://localhost:8000/docs
+
+# 3. Untuk menghentikan layanan:
+docker compose down
+```
+
+---
+
+## 💻 Cara Menjalankan Secara Lokal (Manual)
 
 ### Prasyarat
 - Python 3.12
 - Virtual environment aktif
 
-### Langkah 1 — Siapkan environment
+### Langkah 1 — Siapkan environment & dependensi
 ```bash
 # Buat dan aktifkan virtual environment
 python3.12 -m venv env-dcc-juara
 source env-dcc-juara/bin/activate  # Linux/Mac
+# env-dcc-juara\Scripts\activate   # Windows
 
-# Install semua dependensi (PyTorch CPU + FastAPI + Streamlit)
+# Install dependensi (PyTorch CPU + FastAPI + Streamlit)
 pip install -r requirements.txt
 ```
 
 ### Langkah 2 — Jalankan Backend FastAPI
 ```bash
-# Buka Terminal 1
+# Terminal 1:
 source env-dcc-juara/bin/activate
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-✅ API berjalan di: `http://127.0.0.1:8000`
-📄 Dokumentasi Swagger: `http://127.0.0.1:8000/docs`
+- API aktif di: `http://127.0.0.1:8000`
+- Dokumentasi API Swagger: `http://127.0.0.1:8000/docs`
 
 ### Langkah 3 — Jalankan Frontend Streamlit
 ```bash
-# Buka Terminal 2
+# Terminal 2:
 source env-dcc-juara/bin/activate
 streamlit run app/ui.py --server.port 8501
 ```
-✅ UI berjalan di: `http://localhost:8501`
+- UI aktif di: `http://localhost:8501`
 
 ---
 
-## 🐳 Cara Menjalankan (Docker Compose)
+## 🧪 Validasi API Backend (cURL)
+
+Anda dapat menguji endpoint inferensi secara langsung menggunakan cURL:
 
 ```bash
-# Build dan jalankan kedua layanan sekaligus
-docker compose up --build
-
-# Hentikan semua container
-docker compose down
+curl -X POST "http://127.0.0.1:8000/predict" \
+     -H "accept: application/json" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@sample_image/from_dataset_test/medium_1.png"
 ```
 
-| Service | URL |
-|:---|:---|
-| Frontend Streamlit | http://localhost:8501 |
-| Backend FastAPI | http://localhost:8000 |
-| Swagger Docs | http://localhost:8000/docs |
-
----
-
-## 🔌 API Endpoints
-
-### `GET /` — Health Check
-```json
-{
-  "status": "active",
-  "message": "Kopita API Engine is running."
-}
-```
-
-### `POST /predict` — Prediksi Tingkat Sangrai
-**Request:** `multipart/form-data` dengan field `file` berisi gambar JPG/PNG.
-
-**Response Sukses (200):**
+Contoh respon JSON:
 ```json
 {
   "status": "success",
   "prediction": "Medium",
   "confidence": "98.42%",
-  "detail": "Tingkat sangrai Medium (Sedang). Keseimbangan rasa manis alami dan keasaman yang sangat stabil.",
-  "rekomendasi_bisnis": "Sangat direkomendasikan untuk penjualan komersial ke kedai kopi lokal."
+  "detail": "Tingkat sangrai Medium (Sedang)...",
+  "rekomendasi_bisnis": "Profil serbaguna (omni-roast)..."
 }
 ```
 
-**Response Error (400):**
-```json
-{ "detail": "Format berkas harus berupa gambar (JPG/PNG)!" }
-```
-
 ---
 
-## 🏷️ Kelas Deteksi Model
+## 👥 Tim Pengembang (AIC DCC Juara)
 
-| Kelas | Deskripsi | Rekomendasi Komersial |
-|:---:|:---|:---|
-| 🖤 **Dark** | Sangrai tua, warna gelap kehitaman, berminyak | Kopi Tubruk Tradisional Toraja / Espresso Dark Blend |
-| 🌿 **Green** | Biji mentah, belum disangrai | Sortasi fisik, cek kadar air 11–12% |
-| 🌟 **Light** | Sangrai muda, cokelat terang, acidity tinggi | Manual Brew V60 / Filter / Kalita |
-| ☕ **Medium** | Sangrai sedang, keseimbangan ideal | Espresso Base / Kopi Susu UMKM Kekinian |
-
----
-
-## 📊 Performa Model
-
-- **Arsitektur:** MobileNetV3-Small (fine-tuned dari ImageNet weights)
-- **Akurasi:** **97%+** pada validation/test set
-- **Input:** Gambar RGB 224×224 px (normalisasi ImageNet)
-- **Device:** CPU-Only (ringan, bisa berjalan di laptop tanpa GPU)
-- **Training:** 15 epoch · Adam optimizer · CosineAnnealingLR · Google Colab T4 GPU
-
----
-
-## 👥 Tim Pengembang
-
-| Nama | Peran |
-|:---|:---|
-| Dayat | ML Engineer / Model Training |
-| Mull | Backend Developer |
-| Rey | Frontend Developer |
-| Sasa | UI/UX & Data Analyst |
-
----
-
-## 📄 Lisensi
-
-Proyek ini dikembangkan untuk keperluan **AIC DCC Hackathon**. Seluruh hak cipta milik tim AIC DCC Juara.
+- **Dayat** — Machine Learning Engineer & Model Training
+- **Mull** — Backend Developer & API Architecture
+- **Rey** — Frontend Developer & UI Systems
+- **Sasa** — UI/UX Designer & Data Analyst
