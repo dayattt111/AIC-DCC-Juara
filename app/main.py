@@ -4,17 +4,32 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from pydantic import BaseModel
+from typing import Literal
 
-app = FastAPI(title="TorajiGrade API", version="1.0")
+# ===========================================================
+# REBRANDING NOTE (lihat docs/REBRAND_GUIDE.md):
+#   - Judul API publik  : "Kopita API Engine" ✅
+#   - Nama file model   : tetap 'best_torajigrade_model.pth' ⚠️ JANGAN DIUBAH
+#   - Variabel internal : tetap menggunakan codename 'torajigrade'
+# ===========================================================
+app = FastAPI(
+    title="Kopita API Engine",
+    version="1.0",
+    description="API inferensi AI untuk penilaian kualitas tingkat sangrai biji kopi Toraja (Kopita)."
+)
 
 # 1. Konfigurasi Model & Kelas (Sesuaikan dengan dataset Anda: Dark, Green, Light, Medium)
 CLASSES = ['Dark', 'Green', 'Light', 'Medium']
 DEVICE = torch.device('cpu') # Dipaksa berjalan di CPU agar sangat ringan di laptop Anda
 
 # Inisialisasi arsitektur MobileNetV3-Small
+# CATATAN: MobileNetV3-Small memiliki classifier bertipe nn.Sequential,
+# sehingga penggantian head dilakukan pada elemen terakhir (indeks -1),
+# bukan dengan mengganti seluruh .classifier langsung.
 model = models.mobilenet_v3_small()
-in_features = model.classifier.in_features
-model.classifier = nn.Linear(in_features, len(CLASSES))
+in_features: int = model.classifier[-1].in_features  # Akses Linear terakhir di Sequential
+model.classifier[-1] = nn.Linear(in_features, len(CLASSES))
 
 # Memuat bobot hasil latihan dari Colab secara aman
 MODEL_PATH = "model/best_torajigrade_model.pth"
@@ -32,12 +47,28 @@ preprocess = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-@app.get("/")
-def home():
-    return {"status": "active", "message": "TorajiGrade API Engine is running."}
+# --- Pydantic Response Schemas (Kontrak API ketat sesuai .rules.md Section 3A) ---
+class HealthResponse(BaseModel):
+    status: Literal["active"]
+    message: str
 
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+class PredictResponse(BaseModel):
+    status: Literal["success"]
+    prediction: str
+    confidence: str
+    detail: str
+    rekomendasi_bisnis: str
+
+
+@app.get("/", response_model=HealthResponse)
+def home() -> HealthResponse:
+    return HealthResponse(
+        status="active",
+        message="Kopita API Engine is running."
+    )
+
+@app.post("/predict", response_model=PredictResponse)
+async def predict(file: UploadFile = File(...)) -> PredictResponse:
     # Validasi tipe file
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Format berkas harus berupa gambar (JPG/PNG)!")
@@ -79,13 +110,13 @@ async def predict(file: UploadFile = File(...)):
             }
         }
 
-        return {
-            "status": "success",
-            "prediction": class_name,
-            "confidence": f"{score:.2f}%",
-            "detail": metadata[class_name]["deskripsi"],
-            "rekomendasi_bisnis": metadata[class_name]["saran"]
-        }
+        return PredictResponse(
+            status="success",
+            prediction=class_name,
+            confidence=f"{score:.2f}%",
+            detail=metadata[class_name]["deskripsi"],
+            rekomendasi_bisnis=metadata[class_name]["saran"]
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan sistem: {str(e)}")
