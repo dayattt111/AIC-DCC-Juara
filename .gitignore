@@ -9,6 +9,7 @@ env-dcc-juara/
 env/
 venv/
 ENV/
+.env
 
 # OS files
 .DS_Store
