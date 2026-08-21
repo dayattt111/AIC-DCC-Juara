@@ -5,8 +5,9 @@ from PIL import Image
 st.set_page_config(page_title="kopita - Cerdas Menilai Kopi", page_icon="☕", layout="centered")
 
 # Header & Subtitle
-st.markdown("<h1 style='text-align: center; color: #4E3629;'>☕ TorajiGrade</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7F5A44;'><b>AI Penilai Tingkat Sangrai & Validasi Kopi Toraja untuk Transaksi Adil UMKM Roastery</b></p>", unsafe_allow_html=True)
+# REBRANDING: Header publik menggunakan nama merek "Kopita" (lihat docs/REBRAND_GUIDE.md)
+st.markdown("<h1 style='text-align: center; color: #4E3629;'>☕ Kopita</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #7F5A44;'><b>AI Penilai Kualitas Kopi untuk Transaksi Adil UMKM Roastery Toraja</b></p>", unsafe_allow_html=True)
 st.write("---")
 
 # Widget Upload Gambar
@@ -15,7 +16,7 @@ uploaded_file = st.file_uploader("Unggah foto biji kopi Anda (JPG/PNG)", type=["
 if uploaded_file is not None:
     # Tampilkan gambar yang diunggah pengguna
     image = Image.open(uploaded_file)
-    st.image(image, caption="Biji Kopi yang Diunggah", use_column_width=True)
+    st.image(image, caption="Biji Kopi yang Diunggah", use_container_width=True)
 
     # Tombol Analisis
     if st.button("Mulai Analisis"):
