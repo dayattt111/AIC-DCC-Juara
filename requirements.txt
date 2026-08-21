@@ -1,0 +1,18 @@
+# PyTorch 
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.1.0
+torchvision==0.16.0
+
+# Library Data & AI 
+matplotlib==3.7.1
+numpy==1.23.5
+Pillow==9.4.0
+tqdm==4.66.1
+scikit-learn==1.2.2
+
+# Library Fw (FastAPI & Streamlit)
+fastapi==0.110.0
+uvicorn==0.28.0
+streamlit==1.32.0
+requests==2.31.0
+python-multipart==0.0.9
