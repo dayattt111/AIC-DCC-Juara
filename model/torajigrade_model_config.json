@@ -1,0 +1,41 @@
+{
+    "project": "TorajiGrade",
+    "task": "Coffee Bean Roast Level Classification",
+    "architecture": "MobileNetV3-Small",
+    "framework": "PyTorch",
+    "input_size": [
+        224,
+        224
+    ],
+    "num_classes": 4,
+    "classes": [
+        "Dark",
+        "Green",
+        "Light",
+        "Medium"
+    ],
+    "class_mapping": {
+        "0": "Dark",
+        "1": "Green",
+        "2": "Light",
+        "3": "Medium"
+    },
+    "normalization": {
+        "mean": [
+            0.485,
+            0.456,
+            0.406
+        ],
+        "std": [
+            0.229,
+            0.224,
+            0.225
+        ]
+    },
+    "model_file": "best_torajigrade_model.pth",
+    "inference": {
+        "device": "cpu",
+        "gradient": false,
+        "softmax": true
+    }
+}
