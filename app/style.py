@@ -75,6 +75,39 @@ def inject_global_css() -> None:
         color: #472D2D;
     }
 
+    /* Override Khusus Elemen Berlatar Gelap (JSON Viewer, Code Blocks, Tree Views) */
+    [data-testid="stJson"],
+    [data-testid="stJson"] *,
+    [data-testid="stCodeBlock"],
+    [data-testid="stCodeBlock"] *,
+    div[data-baseweb="tree-view"],
+    div[data-baseweb="tree-view"] *,
+    .stCodeBlock pre,
+    .stCodeBlock code {
+        color: #FDFBF7 !important;
+        background-color: #382424 !important;
+        border-radius: 6px;
+    }
+    /* Kunci & nilai JSON kontras terang */
+    div[data-baseweb="tree-view"] li,
+    div[data-baseweb="tree-view"] span {
+        color: #E6C594 !important;
+    }
+
+    /* Inline Code Blocks (`code`) di Tabel & Markdown */
+    :not(pre) > code,
+    .stMarkdown :not(pre) > code,
+    [data-testid="stMarkdownContainer"] :not(pre) > code,
+    table code {
+        color: #472D2D !important;
+        background-color: #EDE0D4 !important;
+        padding: 0.15rem 0.45rem !important;
+        border-radius: 4px !important;
+        font-weight: 700 !important;
+        font-size: 0.85em !important;
+        border: 1px solid #D4A373 !important;
+    }
+
     /* Judul utama Kopita */
     .kopita-title {
         text-align: center;
