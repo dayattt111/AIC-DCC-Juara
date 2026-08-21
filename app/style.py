@@ -18,7 +18,6 @@ Aturan modul ini (.rules.md Section 2):
   - File model 'best_torajigrade_model.pth' TIDAK disentuh.
 """
 
-import textwrap
 import streamlit as st
 
 
@@ -49,13 +48,22 @@ CLASS_TEXT_COLORS: dict[str, str] = {
 }
 
 
+def _render_html(raw_html: str) -> None:
+    """
+    Render string HTML secara aman di Streamlit.
+    Menghapus semua newline dan leading space agar Markdown parser
+    TIDAK PERNAH menginterpretasikan tag HTML sebagai Indented Code Block.
+    """
+    clean_html = "".join(line.strip() for line in raw_html.strip().splitlines())
+    st.markdown(clean_html, unsafe_allow_html=True)
+
+
 def inject_global_css() -> None:
     """
     Suntikkan CSS global ke Streamlit sekali di awal ui.py.
     """
-    css = textwrap.dedent("""
+    css = """
     <style>
-    /* Google Fonts: Inter */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     html, body, [class*="css"] {
@@ -326,9 +334,8 @@ def inject_global_css() -> None:
         font-size: 0.8rem !important;
     }
     </style>
-    """).strip()
-
-    st.markdown(css, unsafe_allow_html=True)
+    """
+    _render_html(css)
 
 
 # =============================================================
@@ -337,35 +344,35 @@ def inject_global_css() -> None:
 
 def render_info_box(message: str, label: str = "Informasi") -> None:
     """Tampilkan kotak informasi kustom -- menggantikan st.info()."""
-    html = textwrap.dedent(f"""
+    html = f"""
     <div class="box-info">
         <div class="box-info-label">{label}</div>
         <div>{message}</div>
     </div>
-    """).strip()
-    st.markdown(html, unsafe_allow_html=True)
+    """
+    _render_html(html)
 
 
 def render_success_box(message: str, label: str = "Keterangan") -> None:
     """Tampilkan kotak keterangan/sukses kustom -- menggantikan st.success()."""
-    html = textwrap.dedent(f"""
+    html = f"""
     <div class="box-success">
         <div class="box-success-label">{label}</div>
         <div>{message}</div>
     </div>
-    """).strip()
-    st.markdown(html, unsafe_allow_html=True)
+    """
+    _render_html(html)
 
 
 def render_error_box(message: str, label: str = "Terjadi Kesalahan") -> None:
     """Tampilkan kotak error kustom -- menggantikan st.error()."""
-    html = textwrap.dedent(f"""
+    html = f"""
     <div class="box-error">
         <div class="box-error-label">{label}</div>
         <div>{message}</div>
     </div>
-    """).strip()
-    st.markdown(html, unsafe_allow_html=True)
+    """
+    _render_html(html)
 
 
 def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
@@ -379,7 +386,7 @@ def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
     text_color: str = CLASS_TEXT_COLORS.get(prediction, "#FFFFFF")
     fill_pct: float = max(0.0, min(conf_value, 100.0))
 
-    html = textwrap.dedent(f"""
+    html = f"""
     <div class="gauge-wrapper">
         <div class="gauge-label-row">
             <span>Tingkat Keyakinan Model (Confidence Score)</span>
@@ -391,8 +398,8 @@ def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
             </div>
         </div>
     </div>
-    """).strip()
-    st.markdown(html, unsafe_allow_html=True)
+    """
+    _render_html(html)
 
 
 def render_result_card(
@@ -405,7 +412,7 @@ def render_result_card(
     """Render kartu hasil prediksi dalam layout grid 2 kolom yang bersih."""
     accent: str = CLASS_COLORS.get(prediction, PALETTE["earthy_rose"])
 
-    html = textwrap.dedent(f"""
+    html = f"""
     <div class="result-card" style="border-left-color:{accent};">
         <div class="result-card-title">Hasil Analisis Kopi</div>
         <div class="result-grid">
@@ -428,8 +435,8 @@ def render_result_card(
             </div>
         </div>
     </div>
-    """).strip()
-    st.markdown(html, unsafe_allow_html=True)
+    """
+    _render_html(html)
 
 
 def render_sidebar_content(logo_image=None) -> None:
@@ -438,7 +445,7 @@ def render_sidebar_content(logo_image=None) -> None:
         if logo_image is not None:
             st.image(logo_image, use_column_width=True)
 
-        header_html = textwrap.dedent("""
+        header_html = """
         <div style="text-align:center;padding:0.4rem 0 0.6rem 0;">
             <p style="color:#FDFBF7;font-size:1.2rem;font-weight:800;margin:0;letter-spacing:-0.3px;">Kopita</p>
             <p style="color:#FDFBF7;font-size:0.78rem;font-weight:500;opacity:0.85;margin:2px 0 0 0;">
@@ -448,12 +455,12 @@ def render_sidebar_content(logo_image=None) -> None:
                 UMKM Roastery Toraja
             </p>
         </div>
-        """).strip()
-        st.markdown(header_html, unsafe_allow_html=True)
+        """
+        _render_html(header_html)
         st.divider()
 
         with st.expander("Tentang Kopita", expanded=False):
-            about_html = textwrap.dedent("""
+            about_html = """
             <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0;">
             Kopita hadir untuk mengakhiri penilaian kualitas kopi yang
             selama ini bersifat <b>subjektif dan tidak terstandar</b>
@@ -466,11 +473,11 @@ def render_sidebar_content(logo_image=None) -> None:
             transaksi <b>transparan dan adil</b> bagi seluruh ekosistem
             kopi Toraja, Sulawesi Selatan.
             </p>
-            """).strip()
-            st.markdown(about_html, unsafe_allow_html=True)
+            """
+            _render_html(about_html)
 
         with st.expander("Panduan Memotret Biji Kopi", expanded=True):
-            guidelines_html = textwrap.dedent("""
+            guidelines_html = """
             <p style="color:#FDFBF7;font-size:0.82rem;font-weight:600;margin:0 0 0.6rem 0;">
             Ikuti panduan ini untuk hasil analisis paling akurat:
             </p>
@@ -490,11 +497,11 @@ def render_sidebar_content(logo_image=None) -> None:
             Model dilatih pada resolusi 224x224 px.<br>
             Gambar buram atau gelap menurunkan akurasi prediksi.
             </p>
-            """).strip()
-            st.markdown(guidelines_html, unsafe_allow_html=True)
+            """
+            _render_html(guidelines_html)
 
         with st.expander("Tim DCC Juara", expanded=False):
-            team_html = textwrap.dedent("""
+            team_html = """
             <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0 0 0.6rem 0;">
             Kopita dikembangkan oleh <b>Tim DCC Juara</b> -- tim
             multidisiplin yang meyakini bahwa teknologi terbaik adalah
@@ -512,14 +519,14 @@ def render_sidebar_content(logo_image=None) -> None:
                 <li><b>Rey</b> -- Frontend Developer</li>
                 <li><b>Sasa</b> -- UI/UX, Data Analyst</li>
             </ul>
-            """).strip()
-            st.markdown(team_html, unsafe_allow_html=True)
+            """
+            _render_html(team_html)
 
         st.divider()
 
-        footer_html = textwrap.dedent("""
+        footer_html = """
         <p style="color:#FDFBF7;font-size:0.70rem;text-align:center;opacity:0.55;margin:0;">
             AIC DCC Hackathon 2026<br>Tim AIC DCC Juara
         </p>
-        """).strip()
-        st.markdown(footer_html, unsafe_allow_html=True)
+        """
+        _render_html(footer_html)
