@@ -157,11 +157,13 @@ Contoh respon JSON:
 }
 ```
 
----
-
 ## 👥 Tim Pengembang (AIC DCC Juara)
 
-- **Dayat** — Machine Learning Engineer & Model Training
-- **Mull** — Backend Developer & API Architecture
-- **Rey** — Frontend Developer & UI Systems
-- **Sasa** — UI/UX Designer & Data Analyst
+Seluruh anggota tim berasal dari **Universitas Dipa Makassar** dan aktif dalam study club **Dipa Computer Club (DCC)** ([dcc-dp.id](https://dcc-dp.id)).
+
+| <img src="profil_team/day.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Muhammad Hidayat](profil_team/dayat.md)** | <img src="profil_team/mull.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Mull](profil_team/mull.md)** | <img src="profil_team/rey.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Rey](profil_team/rey.md)** | <img src="profil_team/sasa.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Sasa](profil_team/sasa.md)** |
+|:---:|:---:|:---:|:---:|
+| **Machine Learning Engineer** | **Backend Developer** | **Frontend Developer** | **UI/UX & Data Analyst** |
+| Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar |
+| [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) |
+| [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) |
