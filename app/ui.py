@@ -16,7 +16,7 @@ uploaded_file = st.file_uploader("Unggah foto biji kopi Anda (JPG/PNG)", type=["
 if uploaded_file is not None:
     # Tampilkan gambar yang diunggah pengguna
     image = Image.open(uploaded_file)
-    st.image(image, caption="Biji Kopi yang Diunggah", use_container_width=True)
+    st.image(image, caption="Biji Kopi yang Diunggah", use_column_width=True)  # Streamlit 1.32.0 — pakai use_column_width
 
     # Tombol Analisis
     if st.button("Mulai Analisis"):
