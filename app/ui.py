@@ -154,6 +154,43 @@ bagi petani kopi dan UMKM roastery di Toraja, Sulawesi Selatan.
 
 st.divider()
 
+@st.cache_resource
+def ensure_backend_running() -> None:
+    """
+    Auto-Start Backend Service untuk lingkungan Standalone / Streamlit Cloud:
+    Jika backend FastAPI belum aktif, otomatis jalankan uvicorn di background subprocess.
+    """
+    if not check_health():
+        try:
+            import subprocess
+            import os
+            backend_port = int(os.getenv("BACKEND_PORT", "8000"))
+            cmd = [
+                sys.executable,
+                "-m", "uvicorn",
+                "app.main:app",
+                "--host", "127.0.0.1",
+                "--port", str(backend_port),
+            ]
+            subprocess.Popen(
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                cwd=str(_ROOT)
+            )
+            # Tunggu hingga backend siap menerima koneksi
+            import time
+            for _ in range(12):
+                time.sleep(0.5)
+                if check_health():
+                    break
+        except Exception:
+            pass
+
+
+# Pastikan backend aktif (otomatis menyala jika di Streamlit Cloud)
+ensure_backend_running()
+
 # Indikator status backend (tanpa emoji -- teks bersih)
 if not check_health():
     style.render_error_box(

@@ -59,42 +59,30 @@ Frontend Streamlit  (Tampilkan Hasil Analisis, Telemetri Teknis, & Rekomendasi U
 │   └── from_camera_manual/
 ├── .env.example             # Template variabel lingkungan
 ├── .env                     # Variabel lingkungan aktif
-├── requirements.txt         # Dependensi Python (CPU-Only PyTorch)
+├── requirements.txt         # Dependensi Python (PyTorch + FastAPI + Streamlit)
 ├── Dockerfile               # Image Docker Python 3.12-slim
 └── docker-compose.yml       # Orkestrasi container: backend + frontend
 ```
 
 ---
 
-## ⚙️ Konfigurasi Lingkungan (`.env`)
+## 🌐 Deployment ke Streamlit Community Cloud (100% Gratis & Instan)
 
-Sebelum menjalankan aplikasi, pastikan berkas konfigurasi `.env` telah disiapkan:
+Aplikasi Kopita telah dilengkapi fitur **Auto-Start Backend Engine** sehingga dapat langsung dideploy ke **Streamlit Community Cloud (`share.streamlit.io`)** hanya dengan 3 langkah:
 
-```bash
-# Salin template environment
-cp .env.example .env
-```
-
-Isi default berkas `.env`:
-```env
-# Backend Settings
-BACKEND_HOST=0.0.0.0
-BACKEND_PORT=8000
-DEVICE=cpu
-MODEL_PATH=model/best_torajigrade_model.pth
-APP_ENV=production
-
-# Frontend Settings
-BACKEND_URL=http://127.0.0.1:8000
-FRONTEND_PORT=8501
-REQUEST_TIMEOUT=30
-```
+1. **Push repositori** ini ke GitHub Anda.
+2. Buka [share.streamlit.io](https://share.streamlit.io) lalu klik **New app**.
+3. Atur konfigurasi deployment:
+   - **Repository**: `username/repo-kopita`
+   - **Branch**: `main`
+   - **Main file path**: `app/ui.py`
+4. Klik **Deploy!** — Streamlit Cloud akan menginstal dependensi dari `requirements.txt` dan backend FastAPI akan otomatis aktif di background.
 
 ---
 
-## 🐳 Cara Menjalankan dengan Docker Compose (Direkomendasikan)
+## 🐳 Cara Menjalankan dengan Docker Compose (Komputer Lain / Demo)
 
-Pastikan Docker dan Docker Compose telah terpasang di sistem Anda.
+Jika pengguna atau juri lain ingin menjalankan seluruh ekosistem di komputer mereka menggunakan Docker:
 
 ```bash
 # 1. Build dan jalankan seluruh container layanan
@@ -114,17 +102,17 @@ docker compose down
 ## 💻 Cara Menjalankan Secara Lokal (Manual)
 
 ### Prasyarat
-- Python 3.12
+- Python 3.12 (atau Python 3.10 / 3.11)
 - Virtual environment aktif
 
 ### Langkah 1 — Siapkan environment & dependensi
 ```bash
 # Buat dan aktifkan virtual environment
-python3.12 -m venv env-dcc-juara
+python3 -m venv env-dcc-juara
 source env-dcc-juara/bin/activate  # Linux/Mac
 # env-dcc-juara\Scripts\activate   # Windows
 
-# Install dependensi (PyTorch CPU + FastAPI + Streamlit)
+# Install dependensi
 pip install -r requirements.txt
 ```
 
