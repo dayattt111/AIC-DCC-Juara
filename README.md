@@ -2,7 +2,7 @@
 
 <div align="center">
   <img src="https://dcc-dp.id/favicon.ico" width="48" alt="DCC Logo" />
-  <h3>Dipa Computer Club (DCC) &mdash; Universitas Dipa Makassar</h3>
+  <h3>Dipanegara Computer Club (DCC) &mdash; Universitas Dipa Makassar</h3>
   <p><strong><a href="https://dcc-dp.id">dcc-dp.id</a></strong></p>
 </div>
 
