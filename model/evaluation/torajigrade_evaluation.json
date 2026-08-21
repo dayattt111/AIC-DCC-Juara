@@ -1,0 +1,64 @@
+{
+    "model": "/content/best_torajigrade_model.pth",
+    "dataset": "/content/drive/MyDrive/Dataset/dataset-AIC/test",
+    "device": "cuda",
+    "num_samples": 400,
+    "accuracy": 0.98,
+    "accuracy_percentage": 98.0,
+    "macro_precision": 0.98004800480048,
+    "macro_recall": 0.98,
+    "macro_f1": 0.9799994999874997,
+    "weighted_f1": 0.9799994999874997,
+    "classes": {
+        "Dark": {
+            "precision": 0.9603960396039604,
+            "recall": 0.97,
+            "f1_score": 0.9651741293532339,
+            "support": 100
+        },
+        "Green": {
+            "precision": 0.9900990099009901,
+            "recall": 1.0,
+            "f1_score": 0.9950248756218906,
+            "support": 100
+        },
+        "Light": {
+            "precision": 1.0,
+            "recall": 0.99,
+            "f1_score": 0.9949748743718593,
+            "support": 100
+        },
+        "Medium": {
+            "precision": 0.9696969696969697,
+            "recall": 0.96,
+            "f1_score": 0.964824120603015,
+            "support": 100
+        }
+    },
+    "confusion_matrix": [
+        [
+            97,
+            0,
+            0,
+            3
+        ],
+        [
+            0,
+            100,
+            0,
+            0
+        ],
+        [
+            0,
+            1,
+            99,
+            0
+        ],
+        [
+            4,
+            0,
+            0,
+            96
+        ]
+    ]
+}
