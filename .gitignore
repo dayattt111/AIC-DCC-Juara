@@ -1,4 +1,22 @@
-#env files
-env-dcc-juara
-.env
-.env/*
+# Python bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment (Isolasi lokal)
+env-dcc-juara/
+env/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Streamlit configuration and caches
+.streamlit/
