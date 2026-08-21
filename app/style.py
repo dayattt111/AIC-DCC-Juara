@@ -432,6 +432,9 @@ def render_result_card(
         f'</div>'
         f'</div>'
     )
+    st.markdown(html, unsafe_allow_html=True)
+
+
 def render_image(image, caption: str | None = None) -> None:
     """
     Render gambar adaptif yang kompatibel di semua versi Streamlit.
