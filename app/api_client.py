@@ -12,6 +12,7 @@ Aturan modul ini (.rules.md Section 2 - Strict Environment Boundaries):
 
 from __future__ import annotations
 
+import time
 import requests
 from dataclasses import dataclass
 
@@ -30,6 +31,8 @@ class PredictResult:
     confidence: str
     detail: str
     rekomendasi_bisnis: str
+    latency_ms: float = 0.0
+    raw_response: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -59,11 +62,13 @@ def predict_image(
     files = {"file": (filename, file_bytes, content_type)}
 
     try:
+        t0 = time.perf_counter()
         response = requests.post(
             _PREDICT_ENDPOINT,
             files=files,
             timeout=_REQUEST_TIMEOUT
         )
+        latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
         if response.status_code == 200:
             data = response.json()
@@ -73,6 +78,8 @@ def predict_image(
                 confidence=data["confidence"],
                 detail=data["detail"],
                 rekomendasi_bisnis=data["rekomendasi_bisnis"],
+                latency_ms=latency_ms,
+                raw_response=data,
             )
 
         # Error dari server — ambil pesan dari JSON jika ada

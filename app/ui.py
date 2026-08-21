@@ -2,7 +2,13 @@
 app/ui.py -- Kopita Frontend Portal
 =====================================
 Antarmuka pengguna utama Kopita berbasis Streamlit.
-Alur: Upload Gambar -> Analisis -> Tampilkan Prediksi & Metrik.
+Alur: Upload Gambar -> Analisis (Loading Spinner) -> Tampilkan Prediksi,
+Telemetri Teknis, dan Metrik Ilmiah.
+
+Tab Antarmuka:
+  1. Hasil Analisis               (User / Business View)
+  2. Analisis Teknis & Telemetri  (Engineering / Technical View)
+  3. Metrik Model & Bukti Ilmiah  (Scientific / Evaluation View)
 
 Aturan (.rules.md):
   - TIDAK mengimpor torch, torchvision, atau library AI apapun.
@@ -35,8 +41,8 @@ from app import style
 
 def _html(raw_html: str) -> None:
     """
-    Helper untuk merender string HTML bersih.
-    Menghapus semua karakter newline dan indentasi agar Markdown parser
+    Helper lokal untuk merender string HTML bersih.
+    Menghapus semua newline dan indentasi agar Markdown parser
     TIDAK PERNAH menginterpretasikannya sebagai Indented Code Block (<pre><code>).
     """
     clean = "".join(line.strip() for line in raw_html.strip().splitlines())
@@ -155,8 +161,7 @@ if not check_health():
 # =============================================================
 # LAYOUT UTAMA: 2 KOLOM
 # Kiri  (40%): Upload gambar + pratinjau + metadata + tombol
-# Kanan (60%): Tab hasil analisis + metrik model ilmiah
-# (.rules.md Section 3B point 2: Satu Layar Utama MVP)
+# Kanan (60%): 3 Tab Analisis (User, Teknis, Ilmiah)
 # =============================================================
 col_left, col_right = st.columns([4, 6], gap="large")
 
@@ -178,7 +183,7 @@ with col_left:
             use_column_width=True,  # Streamlit 1.32.0
         )
 
-        # Metadata gambar -- kotak info kustom
+        # Metadata gambar
         with st.expander("Detail Berkas", expanded=False):
             st.markdown(f"- **Nama:** `{uploaded_file.name}`")
             st.markdown(f"- **Ukuran:** `{uploaded_file.size / 1024:.1f} KB`")
@@ -194,7 +199,6 @@ with col_left:
             type="primary",
         )
     else:
-        # Placeholder saat belum ada file
         style.render_info_box(
             message=(
                 "Unggah foto biji kopi di atas untuk memulai analisis AI Kopita. "
@@ -206,19 +210,48 @@ with col_left:
         analyze_clicked = False
 
 
+# Eksekusi inferensi dan simpan ke session_state agar persisten di seluruh tab
+if analyze_clicked and uploaded_file is not None:
+    with st.spinner("Model AI Kopita sedang menganalisis biji kopi..."):
+        api_result = predict_image(
+            filename=uploaded_file.name,
+            file_bytes=uploaded_file.getvalue(),
+            content_type=uploaded_file.type,
+        )
+        st.session_state["latest_result"] = api_result
+        st.session_state["analyzed_file"] = uploaded_file.name
+        st.session_state["image_meta"] = {
+            "name": uploaded_file.name,
+            "size_kb": f"{uploaded_file.size / 1024:.1f} KB",
+            "dimensions": f"{image.width} x {image.height} px",
+            "mode": image.mode,
+            "content_type": uploaded_file.type,
+        }
+
+# Cek apakah ada hasil tersimpan untuk file saat ini
+cached_result = st.session_state.get("latest_result")
+if uploaded_file is None:
+    cached_result = None
+    if "latest_result" in st.session_state:
+        del st.session_state["latest_result"]
+
+
 # =============================================================
-# KOLOM KANAN: Tab Hasil Analisis & Metrik Model
+# KOLOM KANAN: 3 TAB LENGKAP
 # =============================================================
 with col_right:
-    tab_result, tab_metrics = st.tabs(
-        ["Hasil Analisis", "Metrik Model  &  Bukti Ilmiah"]
+    tab_user, tab_tech, tab_metrics = st.tabs(
+        [
+            "Hasil Analisis",
+            "Analisis Teknis & Telemetri",
+            "Metrik Model & Bukti Ilmiah",
+        ]
     )
 
     # ----------------------------------------------------------
-    # TAB 1: HASIL ANALISIS
+    # TAB 1: HASIL ANALISIS (USER / BUSINESS VIEW)
     # ----------------------------------------------------------
-    with tab_result:
-
+    with tab_user:
         if uploaded_file is None:
             _html("""
             <div style="text-align:center;padding:3rem 1rem;">
@@ -232,7 +265,7 @@ with col_right:
             </div>
             """)
 
-        elif uploaded_file is not None and not analyze_clicked:
+        elif uploaded_file is not None and cached_result is None:
             style.render_info_box(
                 message=(
                     "Foto sudah diunggah. "
@@ -242,28 +275,20 @@ with col_right:
                 label="Siap Dianalisis",
             )
 
-        elif analyze_clicked:
-            with st.spinner("Model AI Kopita sedang menganalisis gambar..."):
-                result = predict_image(
-                    filename=uploaded_file.name,
-                    file_bytes=uploaded_file.getvalue(),
-                    content_type=uploaded_file.type,
-                )
-
-            # ── SUKSES ────────────────────────────────────────────
-            if isinstance(result, PredictResult):
+        elif cached_result is not None:
+            if isinstance(cached_result, PredictResult):
                 class_cfg  = get_class_config()
-                pred       = result.prediction
-                conf       = result.confidence
+                pred       = cached_result.prediction
+                conf       = cached_result.confidence
                 label_text = class_cfg.get(pred, {}).get("label", pred)
 
-                # Kartu hasil grid -- TANPA emoji, layout bersih
+                # Kartu hasil visual
                 style.render_result_card(
                     label=label_text,
                     prediction=pred,
                     confidence=conf,
-                    description=result.detail,
-                    business_advice=result.rekomendasi_bisnis,
+                    description=cached_result.detail,
+                    business_advice=cached_result.rekomendasi_bisnis,
                 )
 
                 # Meteran kematangan dinamis
@@ -272,7 +297,7 @@ with col_right:
                     confidence_str=conf,
                 )
 
-                # Metric tiles Streamlit (styled via CSS)
+                # Metric tiles Streamlit
                 m1, m2 = st.columns(2)
                 with m1:
                     st.metric(
@@ -288,39 +313,97 @@ with col_right:
 
                 _html("<p class='kopita-footer'>Inferensi: MobileNetV3-Small (CPU)  |  Kopita API Engine  |  Akurasi 97%+</p>")
 
-            # ── ERROR ─────────────────────────────────────────────
-            elif isinstance(result, APIError):
-                if result.http_status == 400:
-                    style.render_error_box(
-                        message=result.message,
-                        label="Format Berkas Tidak Valid",
-                    )
-                elif result.http_status == 500:
-                    style.render_error_box(
-                        message=result.message,
-                        label="Error Internal Server (500)",
-                    )
-                elif result.http_status == 0:
-                    style.render_error_box(
-                        message=result.message,
-                        label="Koneksi ke Backend Gagal",
-                    )
-                elif result.http_status == 408:
-                    style.render_error_box(
-                        message=result.message,
-                        label="Request Timeout",
-                    )
-                else:
-                    style.render_error_box(
-                        message=f"HTTP {result.http_status}: {result.message}",
-                        label="Error Tidak Terduga",
-                    )
+            elif isinstance(cached_result, APIError):
+                style.render_error_box(
+                    message=cached_result.message,
+                    label=f"Error HTTP {cached_result.http_status}",
+                )
 
     # ----------------------------------------------------------
-    # TAB 2: METRIK MODEL & BUKTI ILMIAH
+    # TAB 2: ANALISIS TEKNIS & TELEMETRI (ENGINEERING VIEW)
+    # ----------------------------------------------------------
+    with tab_tech:
+        _html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Telemetri Inferensi & Pipeline Teknis</p>")
+        _html("""
+        <p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>
+        Detail teknis proses inferensi, pipeline tensor, metadata HTTP,
+        dan payload respon JSON murni dari backend FastAPI.
+        </p>
+        """)
+
+        if cached_result is None:
+            style.render_info_box(
+                message="Data teknis akan ditampilkan secara otomatis setelah proses inferensi AI dijalankan.",
+                label="Menunggu Eksekusi",
+            )
+        elif isinstance(cached_result, PredictResult):
+            # 1. Metrik Telemetri Request
+            tcol1, tcol2, tcol3, tcol4 = st.columns(4)
+            with tcol1:
+                st.metric(label="Roundtrip Latency", value=f"{cached_result.latency_ms} ms")
+            with tcol2:
+                st.metric(label="HTTP Status", value="200 OK")
+            with tcol3:
+                st.metric(label="Target Class", value=cached_result.prediction)
+            with tcol4:
+                st.metric(label="Softmax Score", value=cached_result.confidence)
+
+            st.divider()
+
+            # 2. Spesifikasi Pipeline Tensor & Komputasi
+            _html("<p style='font-size:0.9rem;font-weight:700;color:#472D2D;margin-bottom:0.5rem;'>Pipeline Tensor & Preprocessing</p>")
+
+            pcol1, pcol2 = st.columns(2)
+            with pcol1:
+                st.markdown(
+                    """
+                    | Parameter Pipeline | Nilai Teknis |
+                    |:---|:---|
+                    | Input Tensor Shape | `[1, 3, 224, 224]` |
+                    | Data Type | `torch.float32` |
+                    | Color Space | `RGB (3 Channels)` |
+                    | Target Dimension | `224 x 224 px` (Bilinear Interpolation) |
+                    """
+                )
+            with pcol2:
+                st.markdown(
+                    """
+                    | Parameter Komputasi | Nilai Teknis |
+                    |:---|:---|
+                    | Normalization Mean | `[0.485, 0.456, 0.406]` (ImageNet) |
+                    | Normalization Std | `[0.229, 0.224, 0.225]` (ImageNet) |
+                    | Compute Device | `CPU (torch.device('cpu'))` |
+                    | Activation Head | `Softmax(dim=0)` |
+                    """
+                )
+
+            st.divider()
+
+            # 3. Payload JSON Mentah dari API Backend
+            _html("<p style='font-size:0.9rem;font-weight:700;color:#472D2D;margin-bottom:0.5rem;'>Raw JSON API Response (POST /predict)</p>")
+            if cached_result.raw_response:
+                st.json(cached_result.raw_response)
+
+            # 4. Metadata Berkas Citra
+            img_meta = st.session_state.get("image_meta", {})
+            if img_meta:
+                with st.expander("Metadata Berkas Citra Masukan", expanded=False):
+                    st.markdown(f"- **Filename:** `{img_meta.get('name')}`")
+                    st.markdown(f"- **MIME Type:** `{img_meta.get('content_type')}`")
+                    st.markdown(f"- **Payload Size:** `{img_meta.get('size_kb')}`")
+                    st.markdown(f"- **Original Dimensions:** `{img_meta.get('dimensions')}`")
+                    st.markdown(f"- **Color Mode:** `{img_meta.get('mode')}`")
+
+        elif isinstance(cached_result, APIError):
+            style.render_error_box(
+                message=f"HTTP Status: {cached_result.http_status}<br>Detail: {cached_result.message}",
+                label="API Error Payload",
+            )
+
+    # ----------------------------------------------------------
+    # TAB 3: METRIK MODEL & BUKTI ILMIAH (SCIENTIFIC VIEW)
     # ----------------------------------------------------------
     with tab_metrics:
-
         _html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Grafik Evaluasi Pelatihan Model</p>")
         _html("""
         <p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>
