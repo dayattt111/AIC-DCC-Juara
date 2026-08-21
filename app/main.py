@@ -5,7 +5,7 @@ from torchvision import models, transforms
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
 
-app = FastAPI(title="TorajiGrade API", version="1.0")
+app = FastAPI(title="kopita API", version="1.0")
 
 # 1. Konfigurasi Model & Kelas (Sesuaikan dengan dataset Anda: Dark, Green, Light, Medium)
 CLASSES = ['Dark', 'Green', 'Light', 'Medium']

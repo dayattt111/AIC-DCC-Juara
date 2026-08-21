@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from PIL import Image
 
-st.set_page_config(page_title="TorajiGrade - Cerdas Menilai Kopi", page_icon="☕", layout="centered")
+st.set_page_config(page_title="kopita - Cerdas Menilai Kopi", page_icon="☕", layout="centered")
 
 # Header & Subtitle
 st.markdown("<h1 style='text-align: center; color: #4E3629;'>☕ TorajiGrade</h1>", unsafe_allow_html=True)

@@ -21,3 +21,7 @@ Thumbs.db
 
 # Streamlit configuration and caches
 .streamlit/
+
+# AI Agent Rules & Documentation (nnti di apus)
+.rules.md
+docs/
