@@ -1,0 +1,29 @@
+# Virtual environments
+env-dcc-juara/
+venv/
+.venv/
+env/
+
+# Sensitive Environment Configurations
+.env
+.env.local
+.env.*.local
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Git metadata
+.git/
+.gitignore
+
+# Non-production & Archive
+notebooks/archive/
+docs/
+.rules.md
+.agents/
+.gemini/
