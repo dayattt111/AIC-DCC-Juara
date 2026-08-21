@@ -1,6 +1,25 @@
 # ☕ Kopita — AI Penilai Kualitas Kopi untuk Transaksi Adil UMKM
 
+<div align="center">
+  <img src="https://dcc-dp.id/favicon.ico" width="48" alt="DCC Logo" />
+  <h3>Dipa Computer Club (DCC) &mdash; Universitas Dipa Makassar</h3>
+  <p><strong><a href="https://dcc-dp.id">dcc-dp.id</a></strong></p>
+</div>
+
 > **Kopita** adalah aplikasi AI berbasis *computer vision* yang membantu petani kopi dan pelaku UMKM Roastery Toraja dalam **menilai tingkat kematangan sangrai biji kopi** secara objektif, cepat, dan akurat — demi mewujudkan transaksi yang lebih adil dan transparan.
+
+---
+
+## 👥 Tim Pengembang (AIC DCC Juara)
+
+Seluruh anggota tim berasal dari **Universitas Dipa Makassar** dan aktif dalam study club **Dipa Computer Club (DCC)** ([dcc-dp.id](https://dcc-dp.id)).
+
+| <img src="profil_team/day.jpeg" width="160" alt="Muhammad Hidayat" /><br>**[Muhammad Hidayat](profil_team/dayat.md)** | <img src="profil_team/mull.jpeg" width="160" alt="Mull" /><br>**[Mull](profil_team/mull.md)** | <img src="profil_team/rey.jpeg" width="160" alt="Rey" /><br>**[Rey](profil_team/rey.md)** | <img src="profil_team/sasa.jpeg" width="160" alt="Sasa" /><br>**[Sasa](profil_team/sasa.md)** |
+|:---:|:---:|:---:|:---:|
+| **Machine Learning Engineer** | **Backend Developer** | **Frontend Developer** | **UI/UX & Data Analyst** |
+| Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar |
+| [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) |
+| [GitHub](https://github.com/dayattt111) • [LinkedIn](https://linkedin.com/in/muhammad-amin-hidayat) • [IG](https://instagram.com/ur.dayaa) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) |
 
 ---
 
@@ -11,6 +30,7 @@
 | **Nama Proyek** | Kopita *(AI Penilai Kualitas Kopi)* |
 | **Kompetisi** | AIC DCC Hackathon |
 | **Tim** | AIC DCC Juara |
+| **Organisasi** | Dipa Computer Club (DCC) — [dcc-dp.id](https://dcc-dp.id) |
 | **Model AI** | MobileNetV3-Small (PyTorch CPU-Only) |
 | **Akurasi** | 97%+ pada validation/test set |
 | **Kelas Deteksi** | `Dark` · `Green` · `Light` · `Medium` |
@@ -53,13 +73,16 @@ Frontend Streamlit  (Tampilkan Hasil Analisis, Telemetri Teknis, & Rekomendasi U
 │   ├── AIC_DCC_Juara.ipynb  # Notebook pelatihan utama (Google Colab GPU T4)
 │   ├── inference.ipynb      # Notebook verifikasi prediksi lokal
 │   └── evaluation/          # Confusion matrix & metrik evaluasi model
+├── profil_team/             # Profil & foto anggota tim DCC
+│   ├── dayat.md & day.jpeg
+│   ├── mull.md & mull.jpeg
+│   ├── rey.md & rey.jpeg
+│   └── sasa.md & sasa.jpeg
 ├── sample_image/            # Gambar uji coba untuk demo & pengujian juri
-│   ├── from_dataset_test/
-│   ├── from_public_image_out_of_dataset/
-│   └── from_camera_manual/
 ├── .env.example             # Template variabel lingkungan
 ├── .env                     # Variabel lingkungan aktif
-├── requirements.txt         # Dependensi Python (PyTorch + FastAPI + Streamlit)
+├── requirements.txt         # Dependensi Python produksi
+├── requirements_minimum.txt # Dependensi CPU lokal super ringan
 ├── Dockerfile               # Image Docker Python 3.12-slim
 └── docker-compose.yml       # Orkestrasi container: backend + frontend
 ```
@@ -112,8 +135,8 @@ python3 -m venv env-dcc-juara
 source env-dcc-juara/bin/activate  # Linux/Mac
 # env-dcc-juara\Scripts\activate   # Windows
 
-# Install dependensi
-pip install -r requirements.txt
+# Install dependensi (Gunakan requirements_minimum.txt untuk CPU lokal yang super ringan)
+pip install -r requirements_minimum.txt
 ```
 
 ### Langkah 2 — Jalankan Backend FastAPI
@@ -156,14 +179,3 @@ Contoh respon JSON:
   "rekomendasi_bisnis": "Profil serbaguna (omni-roast)..."
 }
 ```
-
-## 👥 Tim Pengembang (AIC DCC Juara)
-
-Seluruh anggota tim berasal dari **Universitas Dipa Makassar** dan aktif dalam study club **Dipa Computer Club (DCC)** ([dcc-dp.id](https://dcc-dp.id)).
-
-| <img src="profil_team/day.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Muhammad Hidayat](profil_team/dayat.md)** | <img src="profil_team/mull.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Mull](profil_team/mull.md)** | <img src="profil_team/rey.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Rey](profil_team/rey.md)** | <img src="profil_team/sasa.jpeg" width="140" height="140" style="border-radius:50%; object-fit:cover;" /><br>**[Sasa](profil_team/sasa.md)** |
-|:---:|:---:|:---:|:---:|
-| **Machine Learning Engineer** | **Backend Developer** | **Frontend Developer** | **UI/UX & Data Analyst** |
-| Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar | Universitas Dipa Makassar |
-| [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) | [Dipa Computer Club](https://dcc-dp.id) |
-| [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) | [GitHub](https://github.com/) • [LinkedIn](https://linkedin.com/) • [IG](https://instagram.com/) |
