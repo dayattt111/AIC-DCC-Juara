@@ -30,10 +30,10 @@ from app import style
 # =============================================================
 # KONFIGURASI HALAMAN — wajib dipanggil PERTAMA sebelum apapun
 # REBRANDING: page_title menggunakan nama publik "Kopita"
-# (lihat docs/REBRAND_GUIDE.md)
+# (lihat docs/REBRAND_GUIDE.md — jangan ubah backend paths)
 # =============================================================
 st.set_page_config(
-    page_title="Kopita - Cerdas Menilai Kopi",
+    page_title="Kopita - AI Cerdas, Transaksi Pas, Kopi Berkualitas",
     page_icon="☕",
     layout="wide",
 )
@@ -69,28 +69,64 @@ def _load_image_from_path(path: str) -> Image.Image | None:
     except Exception:
         return None
 
+@st.cache_data
+def _load_logo() -> Image.Image | None:
+    """
+    Muat logo resmi Kopita dari root proyek.
+    File: logo.png (1536x1024, RGBA) di folder root.
+    Di-cache agar tidak dibaca ulang setiap re-render.
+
+    CATATAN KEAMANAN (docs/REBRAND_GUIDE.md):
+      - Ini hanya memuat berkas gambar logo UI — BUKAN model .pth.
+      - Tidak mengubah jalur model/best_torajigrade_model.pth.
+    """
+    logo_path = _ROOT / "logo.png"
+    try:
+        return Image.open(str(logo_path))
+    except Exception:
+        return None
+
 
 # =============================================================
-# HEADER UTAMA
+# HEADER UTAMA: Logo + Judul + Tagline + Misi
 # =============================================================
+
+# Tampilkan logo Kopita di tengah halaman sebelum judul
+_logo = _load_logo()
+if _logo is not None:
+    # Tampilkan logo centered menggunakan kolom padding kiri-kanan
+    _lcol, _mcol, _rcol = st.columns([2, 3, 2])
+    with _mcol:
+        st.image(
+            _logo,
+            use_column_width=True,   # Streamlit 1.32.0 — use_column_width
+        )
+
+# Judul utama — Deep Espresso (#472D2D)
 st.markdown(
-    "<h1 class='kopita-title'>☕ Kopita</h1>",
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<p class='kopita-subtitle'>"
-    "AI Penilai Kualitas Kopi untuk Transaksi Adil UMKM Roastery Toraja"
-    "</p>",
+    "<h1 class='kopita-title'>Kopita</h1>",
     unsafe_allow_html=True
 )
 
-# Indikator status backend — cek koneksi tanpa mengganggu alur utama
-if not check_health():
-    st.warning(
-        "⚠️ **Backend tidak terdeteksi.** "
-        "Jalankan `uvicorn app.main:app --port 8000` di terminal.",
-        icon="🔌"
-    )
+# Tagline resmi Kopita — Medium Cocoa (#704F4F)
+st.markdown(
+    "<p class='kopita-tagline'>AI Cerdas, Transaksi Pas, Kopi Berkualitas</p>",
+    unsafe_allow_html=True
+)
+
+# Deskripsi misi Kopita — filosofi sosial-ekonomi untuk UMKM & petani
+st.markdown(
+    """
+    <p class='kopita-mission'>
+    Kopita hadir untuk mengakhiri penilaian kualitas kopi yang subjektif dan
+    tidak terstandar. Dengan teknologi <em>computer vision</em> berbasis AI,
+    Kopita memberikan standarisasi objektif berbasis data nyata
+    &mdash; mewujudkan transaksi yang <strong>transparan dan adil</strong>
+    bagi petani kopi dan UMKM roastery di Toraja, Sulawesi Selatan.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
 
 st.divider()
 
