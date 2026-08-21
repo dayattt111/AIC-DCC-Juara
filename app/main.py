@@ -2,7 +2,7 @@ import io
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
-from PIL import Image
+from PIL import Image, ImageOps
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import Literal
@@ -24,11 +24,8 @@ CLASSES = ['Dark', 'Green', 'Light', 'Medium']
 DEVICE = torch.device('cpu') # Dipaksa berjalan di CPU agar sangat ringan di laptop Anda
 
 # Inisialisasi arsitektur MobileNetV3-Small
-# CATATAN: MobileNetV3-Small memiliki classifier bertipe nn.Sequential,
-# sehingga penggantian head dilakukan pada elemen terakhir (indeks -1),
-# bukan dengan mengganti seluruh .classifier langsung.
 model = models.mobilenet_v3_small()
-in_features: int = model.classifier[-1].in_features  # Akses Linear terakhir di Sequential
+in_features: int = model.classifier[-1].in_features
 model.classifier[-1] = nn.Linear(in_features, len(CLASSES))
 
 # Memuat bobot hasil latihan dari Colab secara aman
@@ -40,12 +37,46 @@ try:
 except Exception as e:
     print(f"❌ Gagal memuat model: {str(e)}")
 
-# Pipeline transformator gambar (identik dengan proses validasi/test saat training)
-preprocess = transforms.Compose([
-    transforms.Resize((224, 224)),
+# Pipeline Normalisasi Tensor PyTorch (Standard ImageNet mean & std)
+tensor_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
+
+
+def sanitize_and_preprocess_image(raw_image: Image.Image) -> torch.Tensor:
+    """
+    Fungsi Sanitasi Citra Presisi - Metode Letterbox Padding (0% Terpotong, 0% Terdistorsi):
+      1. Konversi ke RGB murni (menghilangkan alpha channel jika PNG).
+      2. Resize proporsional tanpa memotong bagian manapun dari gambar asli.
+         Biji kopi di posisi pinggir (kiri, kanan, atas, bawah) dijamin 100% utuh masuk.
+      3. Berikan padding warna netral pada ruang sisa agar dimensi persegi 224x224 px terpenuhi.
+      4. Konversi ke Tensor Float32 [1, 3, 224, 224] & Normalisasi ImageNet.
+
+    Returns:
+        Tensor berukuran [1, 3, 224, 224] siap diinferensi oleh model.
+    """
+    # 1. Konversi ke RGB murni
+    rgb_img = raw_image.convert("RGB")
+
+    # 2. Hitung skala proporsional agar 100% gambar asli masuk ke 224x224 px
+    w, h = rgb_img.size
+    scale = min(224.0 / w, 224.0 / h)
+    new_w = max(1, int(w * scale))
+    new_h = max(1, int(h * scale))
+
+    # 3. Resize proporsional menggunakan interpolasi presisi tinggi Lanczos
+    resized_img = rgb_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+    # 4. Buat kanvas netral 224x224 px dan tempelkan gambar di tengah (Letterbox)
+    canvas = Image.new("RGB", (224, 224), (128, 128, 128))
+    pad_x = (224 - new_w) // 2
+    pad_y = (224 - new_h) // 2
+    canvas.paste(resized_img, (pad_x, pad_y))
+
+    # 5. Konversi ke Tensor PyTorch [1, 3, 224, 224]
+    tensor = tensor_transform(canvas).unsqueeze(0).to(DEVICE)
+    return tensor
 
 # --- Pydantic Response Schemas (Kontrak API ketat sesuai .rules.md Section 3A) ---
 class HealthResponse(BaseModel):
@@ -78,8 +109,8 @@ async def predict(file: UploadFile = File(...)) -> PredictResponse:
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-        # Preprocessing gambar agar sesuai format input model
-        tensor = preprocess(image).unsqueeze(0).to(DEVICE)
+        # Preprocessing & Sanitasi Citra Presisi (Smart Lanczos Center Crop -> Tensor [1, 3, 224, 224])
+        tensor = sanitize_and_preprocess_image(image)
 
         # Jalankan prediksi secara sinkron (Sesuai regulasi COMPFEST)
         with torch.no_grad():
