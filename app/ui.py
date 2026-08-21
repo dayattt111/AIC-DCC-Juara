@@ -33,6 +33,12 @@ from app.api_client import predict_image, check_health, PredictResult, APIError
 from app import style
 
 
+def _html(raw_html: str) -> None:
+    """Helper lokal untuk merender string HTML bersih tanpa risiko code block."""
+    clean = "".join(line.strip() for line in raw_html.strip().splitlines())
+    st.markdown(clean, unsafe_allow_html=True)
+
+
 # =============================================================
 # KONFIGURASI HALAMAN
 # Wajib dipanggil PERTAMA sebelum widget apapun.
@@ -112,13 +118,13 @@ if _logo is not None:
         st.image(_logo, use_column_width=True)  # Streamlit 1.32.0
 
 # Judul -- Deep Espresso (#472D2D)
-style._render_html("<h1 class='kopita-title'>Kopita</h1>")
+_html("<h1 class='kopita-title'>Kopita</h1>")
 
 # Tagline resmi
-style._render_html("<p class='kopita-tagline'>AI Cerdas, Transaksi Pas, Kopi Berkualitas</p>")
+_html("<p class='kopita-tagline'>AI Cerdas, Transaksi Pas, Kopi Berkualitas</p>")
 
 # Deskripsi misi -- filosofi keadilan transaksi UMKM
-style._render_html("""
+_html("""
 <p class='kopita-mission'>
 Kopita hadir untuk mengakhiri penilaian kualitas kopi yang subjektif
 dan tidak terstandar. Dengan teknologi <em>computer vision</em> berbasis AI,
@@ -151,7 +157,7 @@ if not check_health():
 col_left, col_right = st.columns([4, 6], gap="large")
 
 with col_left:
-    style._render_html("<p style='font-size:0.95rem;font-weight:600;color:#472D2D;margin-bottom:0.4rem;'>Unggah Foto Biji Kopi</p>")
+    _html("<p style='font-size:0.95rem;font-weight:600;color:#472D2D;margin-bottom:0.4rem;'>Unggah Foto Biji Kopi</p>")
 
     uploaded_file = st.file_uploader(
         "Format yang didukung: JPG, JPEG, PNG",
@@ -174,7 +180,7 @@ with col_left:
             st.markdown(f"- **Ukuran:** `{uploaded_file.size / 1024:.1f} KB`")
             st.markdown(f"- **Dimensi:** `{image.width} x {image.height} px`")
             st.markdown(f"- **Mode warna:** `{image.mode}`")
-            style._render_html("<small style='color:#704F4F;'>Model meresize otomatis ke <b>224 x 224 px</b>.</small>")
+            _html("<small style='color:#704F4F;'>Model meresize otomatis ke <b>224 x 224 px</b>.</small>")
 
         st.write("")
 
@@ -210,7 +216,7 @@ with col_right:
     with tab_result:
 
         if uploaded_file is None:
-            style._render_html("""
+            _html("""
             <div style="text-align:center;padding:3rem 1rem;">
                 <p style="font-size:1.8rem;color:#EDE0D4;font-weight:700;letter-spacing:-0.5px;">
                     Kopita
@@ -276,7 +282,7 @@ with col_right:
                         value=pred,
                     )
 
-                style._render_html("<p class='kopita-footer'>Inferensi: MobileNetV3-Small (CPU)  |  Kopita API Engine  |  Akurasi 97%+</p>")
+                _html("<p class='kopita-footer'>Inferensi: MobileNetV3-Small (CPU)  |  Kopita API Engine  |  Akurasi 97%+</p>")
 
             # ── ERROR ─────────────────────────────────────────────
             elif isinstance(result, APIError):
@@ -311,8 +317,8 @@ with col_right:
     # ----------------------------------------------------------
     with tab_metrics:
 
-        style._render_html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Grafik Evaluasi Pelatihan Model</p>")
-        style._render_html("""
+        _html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Grafik Evaluasi Pelatihan Model</p>")
+        _html("""
         <p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>
         Grafik kurva <em>training loss</em> dan <em>validation accuracy</em>
         selama 15 epoch pelatihan MobileNetV3-Small di Google Colab GPU T4.
@@ -341,8 +347,8 @@ with col_right:
 
         st.divider()
 
-        style._render_html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Confusion Matrix</p>")
-        style._render_html("""
+        _html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Confusion Matrix</p>")
+        _html("""
         <p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>
         Visualisasi distribusi prediksi pada validation/test set
         -- membuktikan akurasi <strong>97%+</strong> secara ilmiah.
@@ -364,7 +370,7 @@ with col_right:
 
         st.divider()
 
-        style._render_html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.8rem;'>Spesifikasi Teknis Model</p>")
+        _html("<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.8rem;'>Spesifikasi Teknis Model</p>")
 
         spec_col1, spec_col2 = st.columns(2)
         with spec_col1:

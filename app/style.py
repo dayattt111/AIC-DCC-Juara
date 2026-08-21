@@ -48,7 +48,7 @@ CLASS_TEXT_COLORS: dict[str, str] = {
 }
 
 
-def _render_html(raw_html: str) -> None:
+def render_html(raw_html: str) -> None:
     """
     Render string HTML secara aman di Streamlit.
     Menghapus semua newline dan leading space agar Markdown parser
@@ -56,6 +56,10 @@ def _render_html(raw_html: str) -> None:
     """
     clean_html = "".join(line.strip() for line in raw_html.strip().splitlines())
     st.markdown(clean_html, unsafe_allow_html=True)
+
+
+# Alias untuk kompatibilitas
+_render_html = render_html
 
 
 def inject_global_css() -> None:
@@ -335,7 +339,7 @@ def inject_global_css() -> None:
     }
     </style>
     """
-    _render_html(css)
+    render_html(css)
 
 
 # =============================================================
@@ -350,7 +354,7 @@ def render_info_box(message: str, label: str = "Informasi") -> None:
         <div>{message}</div>
     </div>
     """
-    _render_html(html)
+    render_html(html)
 
 
 def render_success_box(message: str, label: str = "Keterangan") -> None:
@@ -361,7 +365,7 @@ def render_success_box(message: str, label: str = "Keterangan") -> None:
         <div>{message}</div>
     </div>
     """
-    _render_html(html)
+    render_html(html)
 
 
 def render_error_box(message: str, label: str = "Terjadi Kesalahan") -> None:
@@ -372,7 +376,7 @@ def render_error_box(message: str, label: str = "Terjadi Kesalahan") -> None:
         <div>{message}</div>
     </div>
     """
-    _render_html(html)
+    render_html(html)
 
 
 def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
@@ -399,7 +403,7 @@ def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
         </div>
     </div>
     """
-    _render_html(html)
+    render_html(html)
 
 
 def render_result_card(
@@ -436,7 +440,7 @@ def render_result_card(
         </div>
     </div>
     """
-    _render_html(html)
+    render_html(html)
 
 
 def render_sidebar_content(logo_image=None) -> None:
@@ -456,7 +460,7 @@ def render_sidebar_content(logo_image=None) -> None:
             </p>
         </div>
         """
-        _render_html(header_html)
+        render_html(header_html)
         st.divider()
 
         with st.expander("Tentang Kopita", expanded=False):
@@ -474,7 +478,7 @@ def render_sidebar_content(logo_image=None) -> None:
             kopi Toraja, Sulawesi Selatan.
             </p>
             """
-            _render_html(about_html)
+            render_html(about_html)
 
         with st.expander("Panduan Memotret Biji Kopi", expanded=True):
             guidelines_html = """
@@ -498,7 +502,7 @@ def render_sidebar_content(logo_image=None) -> None:
             Gambar buram atau gelap menurunkan akurasi prediksi.
             </p>
             """
-            _render_html(guidelines_html)
+            render_html(guidelines_html)
 
         with st.expander("Tim DCC Juara", expanded=False):
             team_html = """
@@ -520,7 +524,7 @@ def render_sidebar_content(logo_image=None) -> None:
                 <li><b>Sasa</b> -- UI/UX, Data Analyst</li>
             </ul>
             """
-            _render_html(team_html)
+            render_html(team_html)
 
         st.divider()
 
@@ -529,4 +533,4 @@ def render_sidebar_content(logo_image=None) -> None:
             AIC DCC Hackathon 2026<br>Tim AIC DCC Juara
         </p>
         """
-        _render_html(footer_html)
+        render_html(footer_html)
