@@ -1,39 +1,42 @@
 # =============================================================
-# Dockerfile — Kopita (Public Brand) / TorajiGrade (Codename)
-# Tech Stack: FastAPI:8000 + Streamlit:8501 | PyTorch CPU-Only
-# Python 3.12 | Lihat: docs/ARCHITECTURE.md & .rules.md
+# Dockerfile — Kopita Deployment for Hugging Face Spaces
+# Tech Stack: FastAPI (Backend Engine) + Streamlit (Frontend Portal)
+# Security  : Non-root User (UID 1000) & Internal Backend Isolation
+# Python 3.12-slim | Port: 7860 (Hugging Face Default)
 # =============================================================
 
-# Gunakan Python 3.12 slim agar image sekecil mungkin
 FROM python:3.12-slim
 
-# Set working directory di dalam container
-WORKDIR /kopita
+# 1. Set environment variables dasar
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive
 
-# Salin requirements.txt lebih dulu agar layer ini di-cache
-# selama requirements tidak berubah (optimasi build time)
-COPY requirements.txt .
+# 2. Buat direktori kerja
+WORKDIR /code
 
-# Install semua dependensi Python
-# --no-cache-dir  : hemat ruang disk di dalam image
-# -r requirements.txt sudah mencantumkan PyTorch CPU whl index
+# 3. Salin dan install dependencies Python
+COPY requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r /code/requirements.txt
 
-# Salin seluruh kode sumber aplikasi ke dalam container
-COPY app/ ./app/
+# 4. Buat user sistem non-root dengan UID 1000 (Standar Wajib Hugging Face Spaces)
+RUN useradd -m -u 1000 user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
 
-# Salin bobot model PyTorch ke dalam container
-# PENTING: Nama file 'best_torajigrade_model.pth' TIDAK BOLEH diubah
-# (lihat docs/REBRAND_GUIDE.md — codename backend tetap 'torajigrade')
-COPY model/ ./model/
+# 5. Salin seluruh kode proyek ke dalam kontainer
+COPY --chown=user:user . /code
 
-# Ekspos kedua port layanan:
-#   8000 → FastAPI Backend (uvicorn)
-#   8501 → Streamlit Frontend
-EXPOSE 8000
-EXPOSE 8501
+# 6. Berikan izin eksekusi pada skrip entrypoint dan pastikan kepemilikan file
+RUN chmod +x /code/start.sh && \
+    chown -R user:user /code
 
-# CMD default: dioverride oleh docker-compose.yml per-layanan
-# Contoh untuk backend: uvicorn app.main:app --host 0.0.0.0 --port 8000
-CMD ["echo", "Gunakan docker-compose untuk menjalankan layanan Kopita."]
+# 7. Beralih ke user non-root demi keamanan
+USER user
+
+# 8. Ekspos port resmi Hugging Face Spaces
+EXPOSE 7860
+
+# 9. Jalankan kedua layanan melalui entrypoint script
+CMD ["./start.sh"]

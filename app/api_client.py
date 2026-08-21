@@ -8,23 +8,44 @@ Aturan modul ini (.rules.md Section 2 - Strict Environment Boundaries):
   - TIDAK mengimpor torch, torchvision, atau library AI apapun.
   - TIDAK memuat berkas model .pth secara langsung.
   - Hanya boleh melakukan HTTP request ke backend FastAPI.
+  - Mengambil URL dan Timeout secara dinamis dari Environment Variables.
 """
+
+from __future__ import annotations
 
 import os
 import time
-import requests
 from dataclasses import dataclass
+import requests
 
-# URL backend FastAPI — dibaca dinamis dari environment variable
-# Lokal: http://127.0.0.1:8000 | Docker: http://backend:8000
-_BACKEND_URL: str = os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
-_PREDICT_ENDPOINT: str = f"{_BACKEND_URL}/predict"
-_HEALTH_ENDPOINT: str  = f"{_BACKEND_URL}/"
 
-try:
-    _REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "30"))
-except ValueError:
-    _REQUEST_TIMEOUT = 30
+def get_api_url() -> str:
+    """
+    Dapatkan URL dasar backend FastAPI secara dinamis dari environment variable.
+    Default aman: http://127.0.0.1:8000
+    """
+    return os.getenv("BACKEND_URL", "http://127.0.0.1:8000").rstrip("/")
+
+
+def get_predict_url() -> str:
+    """Dapatkan endpoint /predict dinamis."""
+    return f"{get_api_url()}/predict"
+
+
+def get_health_url() -> str:
+    """Dapatkan endpoint health check (/) dinamis."""
+    return f"{get_api_url()}/"
+
+
+def get_request_timeout() -> int:
+    """
+    Dapatkan timeout request dalam detik dari environment variable.
+    Default aman: 30 detik.
+    """
+    try:
+        return int(os.getenv("REQUEST_TIMEOUT", "30"))
+    except ValueError:
+        return 30
 
 
 @dataclass(frozen=True)
@@ -64,13 +85,15 @@ def predict_image(
         APIError      jika terjadi error HTTP atau koneksi.
     """
     files = {"file": (filename, file_bytes, content_type)}
+    endpoint = get_predict_url()
+    timeout = get_request_timeout()
 
     try:
         t0 = time.perf_counter()
         response = requests.post(
-            _PREDICT_ENDPOINT,
+            endpoint,
             files=files,
-            timeout=_REQUEST_TIMEOUT
+            timeout=timeout
         )
         latency_ms = round((time.perf_counter() - t0) * 1000, 2)
 
@@ -108,7 +131,7 @@ def predict_image(
     except requests.exceptions.Timeout:
         return APIError(
             http_status=408,
-            message=f"Server tidak merespons dalam {_REQUEST_TIMEOUT} detik."
+            message=f"Server tidak merespons dalam {timeout} detik."
         )
     except Exception as exc:
         return APIError(http_status=-1, message=str(exc))
@@ -123,7 +146,7 @@ def check_health() -> bool:
         False jika tidak dapat terhubung.
     """
     try:
-        response = requests.get(_HEALTH_ENDPOINT, timeout=5)
+        response = requests.get(get_health_url(), timeout=min(5, get_request_timeout()))
         return response.status_code == 200
     except Exception:
         return False
