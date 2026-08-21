@@ -1,0 +1,65 @@
+# =============================================================
+# docker-compose.yml — Orkestrasi Multi-Layanan Kopita
+# Layanan  : backend (FastAPI:8000) + frontend (Streamlit:8501)
+# Base image: Dockerfile tunggal yang di-share antar service
+# Lihat: docs/ARCHITECTURE.md, .rules.md Section 1
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  # SERVICE 1: Backend FastAPI (Inference Engine)
+  # Port internal: 8000 | Memuat model PyTorch CPU
+  # -----------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kopita_backend
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount model/ agar bobot model dapat dibaca saat runtime
+      # tanpa perlu rebuild image setiap kali model diperbarui
+      - ./model:/kopita/model:ro
+      # Mount app/ untuk hot-reload saat pengembangan lokal
+      - ./app:/kopita/app
+    working_dir: /kopita
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Restart otomatis jika container crash (berguna saat demo)
+    restart: on-failure
+
+  # -----------------------------------------------------------
+  # SERVICE 2: Frontend Streamlit (Portal Antarmuka Pengguna)
+  # Port internal: 8501 | Hanya mengirim HTTP request ke backend
+  # -----------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kopita_frontend
+    command: >
+      streamlit run app/ui.py
+      --server.port 8501
+      --server.address 0.0.0.0
+      --server.headless true
+      --browser.gatherUsageStats false
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount app/ saja — frontend TIDAK boleh mengakses model/
+      # (lihat .rules.md Section 2: Strict Environment Boundaries)
+      - ./app:/kopita/app
+    working_dir: /kopita
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Frontend menunggu backend siap sebelum start
+    depends_on:
+      - backend
+    restart: on-failure
