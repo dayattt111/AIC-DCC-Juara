@@ -53,15 +53,29 @@ def _html(raw_html: str) -> None:
     st.markdown(clean, unsafe_allow_html=True)
 
 
+@st.cache_data
+def _load_logo() -> Image.Image | None:
+    for name in ("logo-kopita.png", "logo.png"):
+        p = _ROOT / name
+        if p.exists():
+            try:
+                return Image.open(str(p))
+            except Exception:
+                continue
+    return None
+
+
 # =============================================================
 # KONFIGURASI HALAMAN
 # Wajib dipanggil PERTAMA sebelum widget apapun.
 # REBRANDING: page_title menggunakan nama publik "Kopita".
 # (lihat docs/REBRAND_GUIDE.md -- jangan ubah backend paths)
 # =============================================================
+_logo_icon = _load_logo()
+
 st.set_page_config(
     page_title="Kopita - AI Cerdas, Transaksi Pas, Kopi Berkualitas",
-    page_icon="assets/logo.png" if (Path(_ROOT / "logo.png")).exists() else None,
+    page_icon=_logo_icon if _logo_icon is not None else "☕",
     layout="wide",
 )
 
@@ -92,26 +106,6 @@ def _load_image_from_path(path: str) -> Image.Image | None:
         return Image.open(path)
     except Exception:
         return None
-
-
-@st.cache_data
-def _load_logo() -> Image.Image | None:
-    """
-    Muat logo resmi Kopita dari root proyek.
-    Mencoba 'logo-kopita.png' lalu fallback ke 'logo.png'.
-
-    CATATAN KEAMANAN (docs/REBRAND_GUIDE.md):
-      - Hanya memuat berkas gambar logo UI -- BUKAN model .pth.
-      - Tidak mengubah jalur model/best_torajigrade_model.pth.
-    """
-    for name in ("logo-kopita.png", "logo.png"):
-        p = _ROOT / name
-        if p.exists():
-            try:
-                return Image.open(str(p))
-            except Exception:
-                continue
-    return None
 
 
 # =============================================================
