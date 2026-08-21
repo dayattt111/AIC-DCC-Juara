@@ -31,12 +31,14 @@ if str(_ROOT) not in sys.path:
 
 from app.api_client import predict_image, check_health, PredictResult, APIError
 from app import style
-import importlib
-importlib.reload(style)
 
 
 def _html(raw_html: str) -> None:
-    """Helper lokal untuk merender string HTML bersih tanpa risiko code block."""
+    """
+    Helper untuk merender string HTML bersih.
+    Menghapus semua karakter newline dan indentasi agar Markdown parser
+    TIDAK PERNAH menginterpretasikannya sebagai Indented Code Block (<pre><code>).
+    """
     clean = "".join(line.strip() for line in raw_html.strip().splitlines())
     st.markdown(clean, unsafe_allow_html=True)
 

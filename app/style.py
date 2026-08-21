@@ -48,20 +48,6 @@ CLASS_TEXT_COLORS: dict[str, str] = {
 }
 
 
-def render_html(raw_html: str) -> None:
-    """
-    Render string HTML secara aman di Streamlit.
-    Menghapus semua newline dan leading space agar Markdown parser
-    TIDAK PERNAH menginterpretasikan tag HTML sebagai Indented Code Block.
-    """
-    clean_html = "".join(line.strip() for line in raw_html.strip().splitlines())
-    st.markdown(clean_html, unsafe_allow_html=True)
-
-
-# Alias untuk kompatibilitas
-_render_html = render_html
-
-
 def inject_global_css() -> None:
     """
     Suntikkan CSS global ke Streamlit sekali di awal ui.py.
@@ -339,7 +325,7 @@ def inject_global_css() -> None:
     }
     </style>
     """
-    render_html(css)
+    st.markdown(css, unsafe_allow_html=True)
 
 
 # =============================================================
@@ -348,35 +334,20 @@ def inject_global_css() -> None:
 
 def render_info_box(message: str, label: str = "Informasi") -> None:
     """Tampilkan kotak informasi kustom -- menggantikan st.info()."""
-    html = f"""
-    <div class="box-info">
-        <div class="box-info-label">{label}</div>
-        <div>{message}</div>
-    </div>
-    """
-    render_html(html)
+    html = f'<div class="box-info"><div class="box-info-label">{label}</div><div>{message}</div></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_success_box(message: str, label: str = "Keterangan") -> None:
     """Tampilkan kotak keterangan/sukses kustom -- menggantikan st.success()."""
-    html = f"""
-    <div class="box-success">
-        <div class="box-success-label">{label}</div>
-        <div>{message}</div>
-    </div>
-    """
-    render_html(html)
+    html = f'<div class="box-success"><div class="box-success-label">{label}</div><div>{message}</div></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_error_box(message: str, label: str = "Terjadi Kesalahan") -> None:
     """Tampilkan kotak error kustom -- menggantikan st.error()."""
-    html = f"""
-    <div class="box-error">
-        <div class="box-error-label">{label}</div>
-        <div>{message}</div>
-    </div>
-    """
-    render_html(html)
+    html = f'<div class="box-error"><div class="box-error-label">{label}</div><div>{message}</div></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
@@ -390,20 +361,20 @@ def render_maturity_gauge(prediction: str, confidence_str: str) -> None:
     text_color: str = CLASS_TEXT_COLORS.get(prediction, "#FFFFFF")
     fill_pct: float = max(0.0, min(conf_value, 100.0))
 
-    html = f"""
-    <div class="gauge-wrapper">
-        <div class="gauge-label-row">
-            <span>Tingkat Keyakinan Model (Confidence Score)</span>
-            <span>{fill_pct:.1f}%</span>
-        </div>
-        <div class="gauge-track">
-            <div class="gauge-fill" style="width:{fill_pct}%; background-color:{bar_color}; color:{text_color};">
-                {fill_pct:.1f}%
-            </div>
-        </div>
-    </div>
-    """
-    render_html(html)
+    html = (
+        f'<div class="gauge-wrapper">'
+        f'<div class="gauge-label-row">'
+        f'<span>Tingkat Keyakinan Model (Confidence Score)</span>'
+        f'<span>{fill_pct:.1f}%</span>'
+        f'</div>'
+        f'<div class="gauge-track">'
+        f'<div class="gauge-fill" style="width:{fill_pct}%; background-color:{bar_color}; color:{text_color};">'
+        f'{fill_pct:.1f}%'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_result_card(
@@ -416,31 +387,19 @@ def render_result_card(
     """Render kartu hasil prediksi dalam layout grid 2 kolom yang bersih."""
     accent: str = CLASS_COLORS.get(prediction, PALETTE["earthy_rose"])
 
-    html = f"""
-    <div class="result-card" style="border-left-color:{accent};">
-        <div class="result-card-title">Hasil Analisis Kopi</div>
-        <div class="result-grid">
-            <div>
-                <div class="result-cell-label">Kelas Terdeteksi</div>
-                <div class="result-cell-value">{label}</div>
-            </div>
-            <div>
-                <div class="result-cell-label">Kepercayaan Model</div>
-                <div class="result-cell-value">{confidence}</div>
-            </div>
-            <hr class="result-divider">
-            <div class="result-cell-full">
-                <div class="result-cell-label">Karakteristik Fisik</div>
-                <div class="result-cell-value">{description}</div>
-            </div>
-            <div class="result-cell-full">
-                <div class="result-cell-label">Rekomendasi Bisnis UMKM</div>
-                <div class="result-cell-value">{business_advice}</div>
-            </div>
-        </div>
-    </div>
-    """
-    render_html(html)
+    html = (
+        f'<div class="result-card" style="border-left-color:{accent};">'
+        f'<div class="result-card-title">Hasil Analisis Kopi</div>'
+        f'<div class="result-grid">'
+        f'<div><div class="result-cell-label">Kelas Terdeteksi</div><div class="result-cell-value">{label}</div></div>'
+        f'<div><div class="result-cell-label">Kepercayaan Model</div><div class="result-cell-value">{confidence}</div></div>'
+        f'<hr class="result-divider">'
+        f'<div class="result-cell-full"><div class="result-cell-label">Karakteristik Fisik</div><div class="result-cell-value">{description}</div></div>'
+        f'<div class="result-cell-full"><div class="result-cell-label">Rekomendasi Bisnis UMKM</div><div class="result-cell-value">{business_advice}</div></div>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_sidebar_content(logo_image=None) -> None:
@@ -449,88 +408,83 @@ def render_sidebar_content(logo_image=None) -> None:
         if logo_image is not None:
             st.image(logo_image, use_column_width=True)
 
-        header_html = """
-        <div style="text-align:center;padding:0.4rem 0 0.6rem 0;">
-            <p style="color:#FDFBF7;font-size:1.2rem;font-weight:800;margin:0;letter-spacing:-0.3px;">Kopita</p>
-            <p style="color:#FDFBF7;font-size:0.78rem;font-weight:500;opacity:0.85;margin:2px 0 0 0;">
-                Sistem Cerdas Penilai Kualitas Kopi
-            </p>
-            <p style="color:#FDFBF7;font-size:0.75rem;font-weight:400;opacity:0.70;margin:1px 0 0 0;">
-                UMKM Roastery Toraja
-            </p>
-        </div>
-        """
-        render_html(header_html)
+        header_html = (
+            '<div style="text-align:center;padding:0.4rem 0 0.6rem 0;">'
+            '<p style="color:#FDFBF7;font-size:1.2rem;font-weight:800;margin:0;letter-spacing:-0.3px;">Kopita</p>'
+            '<p style="color:#FDFBF7;font-size:0.78rem;font-weight:500;opacity:0.85;margin:2px 0 0 0;">'
+            'Sistem Cerdas Penilai Kualitas Kopi'
+            '</p>'
+            '<p style="color:#FDFBF7;font-size:0.75rem;font-weight:400;opacity:0.70;margin:1px 0 0 0;">'
+            'UMKM Roastery Toraja'
+            '</p>'
+            '</div>'
+        )
+        st.markdown(header_html, unsafe_allow_html=True)
         st.divider()
 
         with st.expander("Tentang Kopita", expanded=False):
-            about_html = """
-            <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0;">
-            Kopita hadir untuk mengakhiri penilaian kualitas kopi yang
-            selama ini bersifat <b>subjektif dan tidak terstandar</b>
-            -- merugikan petani dan UMKM roastery lokal Toraja.
-            </p>
-            <br>
-            <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0;">
-            Dengan <b>computer vision</b> berbasis MobileNetV3-Small,
-            Kopita menghadirkan standarisasi objektif yang mewujudkan
-            transaksi <b>transparan dan adil</b> bagi seluruh ekosistem
-            kopi Toraja, Sulawesi Selatan.
-            </p>
-            """
-            render_html(about_html)
+            about_html = (
+                '<p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0;">'
+                'Kopita hadir untuk mengakhiri penilaian kualitas kopi yang '
+                'selama ini bersifat <b>subjektif dan tidak terstandar</b> '
+                '-- merugikan petani dan UMKM roastery lokal Toraja.'
+                '</p><br>'
+                '<p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0;">'
+                'Dengan <b>computer vision</b> berbasis MobileNetV3-Small, '
+                'Kopita menghadirkan standarisasi objektif yang mewujudkan '
+                'transaksi <b>transparan dan adil</b> bagi seluruh ekosistem '
+                'kopi Toraja, Sulawesi Selatan.'
+                '</p>'
+            )
+            st.markdown(about_html, unsafe_allow_html=True)
 
         with st.expander("Panduan Memotret Biji Kopi", expanded=True):
-            guidelines_html = """
-            <p style="color:#FDFBF7;font-size:0.82rem;font-weight:600;margin:0 0 0.6rem 0;">
-            Ikuti panduan ini untuk hasil analisis paling akurat:
-            </p>
-            <p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">
-            <b>Jarak</b><br>
-            Foto tegak lurus dari atas, jarak 10-15 cm dari biji kopi.
-            </p>
-            <p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">
-            <b>Pencahayaan</b><br>
-            Cahaya terang dan merata. Hindari bayangan ekstrem atau pencahayaan dari satu sisi saja.
-            </p>
-            <p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">
-            <b>Fokus</b><br>
-            Kamera fokus penuh pada sebaran biji kopi, bukan pada latar belakang atau wadah.
-            </p>
-            <p style="color:#FDFBF7;font-size:0.74rem;opacity:0.65;margin:0.8rem 0 0 0;line-height:1.5;">
-            Model dilatih pada resolusi 224x224 px.<br>
-            Gambar buram atau gelap menurunkan akurasi prediksi.
-            </p>
-            """
-            render_html(guidelines_html)
+            guidelines_html = (
+                '<p style="color:#FDFBF7;font-size:0.82rem;font-weight:600;margin:0 0 0.6rem 0;">'
+                'Ikuti panduan ini untuk hasil analisis paling akurat:'
+                '</p>'
+                '<p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">'
+                '<b>Jarak</b><br>Foto tegak lurus dari atas, jarak 10-15 cm dari biji kopi.'
+                '</p>'
+                '<p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">'
+                '<b>Pencahayaan</b><br>Cahaya terang dan merata. Hindari bayangan ekstrem atau pencahayaan dari satu sisi saja.'
+                '</p>'
+                '<p style="color:#FDFBF7;font-size:0.81rem;line-height:1.65;margin:0 0 0.5rem 0;">'
+                '<b>Fokus</b><br>Kamera fokus penuh pada sebaran biji kopi, bukan pada latar belakang atau wadah.'
+                '</p>'
+                '<p style="color:#FDFBF7;font-size:0.74rem;opacity:0.65;margin:0.8rem 0 0 0;line-height:1.5;">'
+                'Model dilatih pada resolusi 224x224 px.<br>Gambar buram atau gelap menurunkan akurasi prediksi.'
+                '</p>'
+            )
+            st.markdown(guidelines_html, unsafe_allow_html=True)
 
         with st.expander("Tim DCC Juara", expanded=False):
-            team_html = """
-            <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0 0 0.6rem 0;">
-            Kopita dikembangkan oleh <b>Tim DCC Juara</b> -- tim
-            multidisiplin yang meyakini bahwa teknologi terbaik adalah
-            teknologi yang berdampak nyata bagi masyarakat.
-            </p>
-            <p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0 0 0.6rem 0;">
-            Kami membangun Kopita dengan semangat <b>gotong royong</b>
-            dan komitmen <b>demokratisasi teknologi</b> -- agar inovasi
-            AI tidak hanya dinikmati korporasi besar, tetapi juga oleh
-            petani dan UMKM kecil di pelosok Toraja.
-            </p>
-            <ul style="color:#FDFBF7;font-size:0.81rem;padding-left:1.1rem;line-height:1.9;margin:0;">
-                <li><b>Dayat</b> -- ML Engineer, Model Training</li>
-                <li><b>Mull</b> -- Backend Developer</li>
-                <li><b>Rey</b> -- Frontend Developer</li>
-                <li><b>Sasa</b> -- UI/UX, Data Analyst</li>
-            </ul>
-            """
-            render_html(team_html)
+            team_html = (
+                '<p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0 0 0.6rem 0;">'
+                'Kopita dikembangkan oleh <b>Tim DCC Juara</b> -- tim '
+                'multidisiplin yang meyakini bahwa teknologi terbaik adalah '
+                'teknologi yang berdampak nyata bagi masyarakat.'
+                '</p>'
+                '<p style="color:#FDFBF7;font-size:0.83rem;line-height:1.7;margin:0 0 0.6rem 0;">'
+                'Kami membangun Kopita dengan semangat <b>gotong royong</b> '
+                'dan komitmen <b>demokratisasi teknologi</b> -- agar inovasi '
+                'AI tidak hanya dinikmati korporasi besar, tetapi juga oleh '
+                'petani dan UMKM kecil di pelosok Toraja.'
+                '</p>'
+                '<ul style="color:#FDFBF7;font-size:0.81rem;padding-left:1.1rem;line-height:1.9;margin:0;">'
+                '<li><b>Dayat</b> -- ML Engineer, Model Training</li>'
+                '<li><b>Mull</b> -- Backend Developer</li>'
+                '<li><b>Rey</b> -- Frontend Developer</li>'
+                '<li><b>Sasa</b> -- UI/UX, Data Analyst</li>'
+                '</ul>'
+            )
+            st.markdown(team_html, unsafe_allow_html=True)
 
         st.divider()
 
-        footer_html = """
-        <p style="color:#FDFBF7;font-size:0.70rem;text-align:center;opacity:0.55;margin:0;">
-            AIC DCC Hackathon 2026<br>Tim AIC DCC Juara
-        </p>
-        """
-        render_html(footer_html)
+        footer_html = (
+            '<p style="color:#FDFBF7;font-size:0.70rem;text-align:center;opacity:0.55;margin:0;">'
+            'AIC DCC Hackathon 2026<br>Tim AIC DCC Juara'
+            '</p>'
+        )
+        st.markdown(footer_html, unsafe_allow_html=True)
