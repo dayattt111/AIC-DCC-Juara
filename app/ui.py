@@ -43,6 +43,35 @@ from app.api_client import predict_image, check_health, PredictResult, APIError
 from app import style
 
 
+# =============================================================
+# KONFIGURASI HALAMAN
+# Wajib dipanggil PERTAMA sebelum perintah Streamlit apapun.
+# REBRANDING: page_title menggunakan nama publik "Kopita".
+# (lihat docs/REBRAND_GUIDE.md -- jangan ubah backend paths)
+# =============================================================
+def _get_page_icon() -> Image.Image | str:
+    """Fungsi murni Python untuk memuat icon logo sebelum st.set_page_config."""
+    for name in ("logo-kopita.png", "logo.png"):
+        p = _ROOT / name
+        if p.exists():
+            try:
+                return Image.open(str(p))
+            except Exception:
+                pass
+    return "☕"
+
+
+st.set_page_config(
+    page_title="Kopita - AI Cerdas, Transaksi Pas, Kopi Berkualitas",
+    page_icon=_get_page_icon(),
+    layout="wide",
+)
+
+# Suntikkan CSS global tema Warm Earthy Espresso
+# (.rules.md Section 3B: UI feedback & visual state)
+style.inject_global_css()
+
+
 def _html(raw_html: str) -> None:
     """
     Helper lokal untuk merender string HTML bersih.
@@ -63,25 +92,6 @@ def _load_logo() -> Image.Image | None:
             except Exception:
                 continue
     return None
-
-
-# =============================================================
-# KONFIGURASI HALAMAN
-# Wajib dipanggil PERTAMA sebelum widget apapun.
-# REBRANDING: page_title menggunakan nama publik "Kopita".
-# (lihat docs/REBRAND_GUIDE.md -- jangan ubah backend paths)
-# =============================================================
-_logo_icon = _load_logo()
-
-st.set_page_config(
-    page_title="Kopita - AI Cerdas, Transaksi Pas, Kopi Berkualitas",
-    page_icon=_logo_icon if _logo_icon is not None else "☕",
-    layout="wide",
-)
-
-# Suntikkan CSS global tema Warm Earthy Espresso
-# (.rules.md Section 3B: UI feedback & visual state)
-style.inject_global_css()
 
 
 # =============================================================
