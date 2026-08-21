@@ -18,6 +18,7 @@ REBRAND (docs/REBRAND_GUIDE.md):
 """
 
 import sys
+import textwrap
 from pathlib import Path
 
 import streamlit as st
@@ -78,7 +79,7 @@ def _load_image_from_path(path: str) -> Image.Image | None:
 def _load_logo() -> Image.Image | None:
     """
     Muat logo resmi Kopita dari root proyek.
-    Mencoba 'logo.png' (nama aktual yang tersedia di repositori).
+    Mencoba 'logo-kopita.png' lalu fallback ke 'logo.png'.
 
     CATATAN KEAMANAN (docs/REBRAND_GUIDE.md):
       - Hanya memuat berkas gambar logo UI -- BUKAN model .pth.
@@ -124,18 +125,16 @@ st.markdown(
 )
 
 # Deskripsi misi -- filosofi keadilan transaksi UMKM
-st.markdown(
-    """
-    <p class='kopita-mission'>
-    Kopita hadir untuk mengakhiri penilaian kualitas kopi yang subjektif
-    dan tidak terstandar. Dengan teknologi <em>computer vision</em> berbasis AI,
-    Kopita memberikan standarisasi objektif berbasis data nyata
-    &mdash; mewujudkan transaksi yang <strong>transparan dan adil</strong>
-    bagi petani kopi dan UMKM roastery di Toraja, Sulawesi Selatan.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
+mission_html = textwrap.dedent("""
+<p class='kopita-mission'>
+Kopita hadir untuk mengakhiri penilaian kualitas kopi yang subjektif
+dan tidak terstandar. Dengan teknologi <em>computer vision</em> berbasis AI,
+Kopita memberikan standarisasi objektif berbasis data nyata
+&mdash; mewujudkan transaksi yang <strong>transparan dan adil</strong>
+bagi petani kopi dan UMKM roastery di Toraja, Sulawesi Selatan.
+</p>
+""").strip()
+st.markdown(mission_html, unsafe_allow_html=True)
 
 st.divider()
 
@@ -161,8 +160,7 @@ col_left, col_right = st.columns([4, 6], gap="large")
 
 with col_left:
     st.markdown(
-        "<p style='font-size:0.95rem;font-weight:600;"
-        "color:#472D2D;margin-bottom:0.4rem;'>Unggah Foto Biji Kopi</p>",
+        "<p style='font-size:0.95rem;font-weight:600;color:#472D2D;margin-bottom:0.4rem;'>Unggah Foto Biji Kopi</p>",
         unsafe_allow_html=True,
     )
 
@@ -181,29 +179,26 @@ with col_left:
             use_column_width=True,  # Streamlit 1.32.0
         )
 
-        # Metadata gambar -- kotak info kustom (bukan st.info)
+        # Metadata gambar -- kotak info kustom
         with st.expander("Detail Berkas", expanded=False):
             st.markdown(f"- **Nama:** `{uploaded_file.name}`")
             st.markdown(f"- **Ukuran:** `{uploaded_file.size / 1024:.1f} KB`")
             st.markdown(f"- **Dimensi:** `{image.width} x {image.height} px`")
             st.markdown(f"- **Mode warna:** `{image.mode}`")
             st.markdown(
-                "<small style='color:#704F4F;'>"
-                "Model meresize otomatis ke <b>224 x 224 px</b>."
-                "</small>",
+                "<small style='color:#704F4F;'>Model meresize otomatis ke <b>224 x 224 px</b>.</small>",
                 unsafe_allow_html=True,
             )
 
         st.write("")
 
         # Tombol Analisis -- CTA Earthy Rose (#A77979)
-        # (.rules.md Section 3B: Unggah -> Tombol -> Tampilkan Prediksi)
         analyze_clicked = st.button(
             "Mulai Analisis Kopi",
             type="primary",
         )
     else:
-        # Placeholder saat belum ada file -- kotak info kustom
+        # Placeholder saat belum ada file
         style.render_info_box(
             message=(
                 "Unggah foto biji kopi di atas untuk memulai analisis AI Kopita. "
@@ -229,21 +224,18 @@ with col_right:
     with tab_result:
 
         if uploaded_file is None:
-            st.markdown(
-                """
-                <div style="text-align:center;padding:3rem 1rem;">
-                    <p style="font-size:1.8rem;color:#EDE0D4;
-                               font-weight:700;letter-spacing:-0.5px;">
-                        Kopita
-                    </p>
-                    <p style="color:#A77979;font-size:0.9rem;line-height:1.7;">
-                        Hasil analisis akan muncul di sini setelah<br>
-                        foto biji kopi diunggah dan dianalisis.
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            placeholder_html = textwrap.dedent("""
+            <div style="text-align:center;padding:3rem 1rem;">
+                <p style="font-size:1.8rem;color:#EDE0D4;font-weight:700;letter-spacing:-0.5px;">
+                    Kopita
+                </p>
+                <p style="color:#A77979;font-size:0.9rem;line-height:1.7;">
+                    Hasil analisis akan muncul di sini setelah<br>
+                    foto biji kopi diunggah dan dianalisis.
+                </p>
+            </div>
+            """).strip()
+            st.markdown(placeholder_html, unsafe_allow_html=True)
 
         elif uploaded_file is not None and not analyze_clicked:
             style.render_info_box(
@@ -300,10 +292,7 @@ with col_right:
                     )
 
                 st.markdown(
-                    "<p class='kopita-footer'>"
-                    "Inferensi: MobileNetV3-Small (CPU)  |  "
-                    "Kopita API Engine  |  Akurasi 97%+"
-                    "</p>",
+                    "<p class='kopita-footer'>Inferensi: MobileNetV3-Small (CPU)  |  Kopita API Engine  |  Akurasi 97%+</p>",
                     unsafe_allow_html=True,
                 )
 
@@ -341,13 +330,11 @@ with col_right:
     with tab_metrics:
 
         st.markdown(
-            "<p style='font-size:1rem;font-weight:700;color:#472D2D;"
-            "margin-bottom:0.3rem;'>Grafik Evaluasi Pelatihan Model</p>",
+            "<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Grafik Evaluasi Pelatihan Model</p>",
             unsafe_allow_html=True,
         )
         st.markdown(
-            "<p style='font-size:0.87rem;color:#704F4F;line-height:1.65;"
-            "margin-bottom:1rem;'>"
+            "<p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>"
             "Grafik kurva <em>training loss</em> dan <em>validation accuracy</em> "
             "selama 15 epoch pelatihan MobileNetV3-Small di Google Colab GPU T4."
             "</p>",
@@ -377,13 +364,11 @@ with col_right:
         st.divider()
 
         st.markdown(
-            "<p style='font-size:1rem;font-weight:700;color:#472D2D;"
-            "margin-bottom:0.3rem;'>Confusion Matrix</p>",
+            "<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.3rem;'>Confusion Matrix</p>",
             unsafe_allow_html=True,
         )
         st.markdown(
-            "<p style='font-size:0.87rem;color:#704F4F;line-height:1.65;"
-            "margin-bottom:1rem;'>"
+            "<p style='font-size:0.87rem;color:#704F4F;line-height:1.65;margin-bottom:1rem;'>"
             "Visualisasi distribusi prediksi pada validation/test set "
             "-- membuktikan akurasi <strong>97%+</strong> secara ilmiah."
             "</p>",
@@ -406,8 +391,7 @@ with col_right:
         st.divider()
 
         st.markdown(
-            "<p style='font-size:1rem;font-weight:700;color:#472D2D;"
-            "margin-bottom:0.8rem;'>Spesifikasi Teknis Model</p>",
+            "<p style='font-size:1rem;font-weight:700;color:#472D2D;margin-bottom:0.8rem;'>Spesifikasi Teknis Model</p>",
             unsafe_allow_html=True,
         )
 
