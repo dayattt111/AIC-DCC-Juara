@@ -31,6 +31,8 @@ if str(_ROOT) not in sys.path:
 
 from app.api_client import predict_image, check_health, PredictResult, APIError
 from app import style
+import importlib
+importlib.reload(style)
 
 
 def _html(raw_html: str) -> None:
