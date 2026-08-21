@@ -1,16 +1,18 @@
-# PyTorch 
---index-url https://download.pytorch.org/whl/cpu
-torch==2.1.0
-torchvision==0.16.0
+--index-url https://pypi.org/simple
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# PyTorch khusus CPU (saya menggunakan CPU soalnya) 
+torch==2.2.1
+torchvision==0.17.1
 
 # Library Data & AI 
-matplotlib==3.7.1
-numpy==1.23.5
-Pillow==9.4.0
+matplotlib==3.8.3
+numpy==1.26.4
+Pillow==10.2.0
 tqdm==4.66.1
-scikit-learn==1.2.2
+scikit-learn==1.4.1.post1
 
-# Library Fw (FastAPI & Streamlit)
+# Library (FastAPI & Streamlit)
 fastapi==0.110.0
 uvicorn==0.28.0
 streamlit==1.32.0

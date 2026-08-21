@@ -1,0 +1,4 @@
+#env files
+env-dcc-juara
+.env
+.env/*
