@@ -139,7 +139,7 @@ with col_left:
         analyze_clicked = st.button(
             "🔍 Mulai Analisis Kopi",
             type="primary",
-            use_container_width=True,
+            # use_container_width tidak tersedia di Streamlit 1.32.0
         )
     else:
         st.info(
