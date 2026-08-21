@@ -133,7 +133,7 @@ style.render_sidebar_content(logo_image=_logo)
 if _logo is not None:
     _lc, _mc, _rc = st.columns([2, 3, 2])
     with _mc:
-        st.image(_logo, use_column_width=True)  # Streamlit 1.32.0
+        style.render_image(_logo)
 
 # Judul -- Deep Espresso (#472D2D)
 _html("<h1 class='kopita-title'>Kopita</h1>")
@@ -222,11 +222,7 @@ with col_left:
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(
-            image,
-            caption="Pratinjau Gambar",
-            use_column_width=True,  # Streamlit 1.32.0
-        )
+        style.render_image(image, caption="Pratinjau Gambar")
 
         # Metadata gambar
         with st.expander("Detail Berkas", expanded=False):
@@ -466,10 +462,9 @@ with col_right:
 
         metrics_img = _load_image_from_path(_METRICS_PATH)
         if metrics_img is not None:
-            st.image(
+            style.render_image(
                 metrics_img,
                 caption="Kurva Training & Validation -- MobileNetV3-Small (15 Epoch)",
-                use_column_width=True,
             )
         else:
             style.render_error_box(
@@ -489,10 +484,9 @@ with col_right:
 
         confmat_img = _load_image_from_path(_CONFMAT_PATH)
         if confmat_img is not None:
-            st.image(
+            style.render_image(
                 confmat_img,
                 caption="Confusion Matrix -- 4 Kelas: Dark, Green, Light, Medium",
-                use_column_width=True,
             )
         else:
             style.render_error_box(

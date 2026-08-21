@@ -435,11 +435,22 @@ def render_result_card(
     st.markdown(html, unsafe_allow_html=True)
 
 
+def render_image(image, caption: str | None = None) -> None:
+    """
+    Render gambar adaptif yang kompatibel di semua versi Streamlit.
+    (Mendukung Streamlit baru dengan use_container_width dan Streamlit lama dengan use_column_width).
+    """
+    try:
+        st.image(image, caption=caption, use_container_width=True)
+    except TypeError:
+        st.image(image, caption=caption, use_column_width=True)
+
+
 def render_sidebar_content(logo_image=None) -> None:
     """Render konten sidebar Kopita secara lengkap."""
     with st.sidebar:
         if logo_image is not None:
-            st.image(logo_image, use_column_width=True)
+            render_image(logo_image)
 
         header_html = (
             '<div style="text-align:center;padding:0.4rem 0 0.6rem 0;">'
