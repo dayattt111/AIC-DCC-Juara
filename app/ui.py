@@ -24,7 +24,11 @@ REBRAND (docs/REBRAND_GUIDE.md):
 """
 
 import sys
+import warnings
 from pathlib import Path
+
+# Untuk mengaktifkan kembali peringatan di terminal, beri tanda pagar (#) pada baris di bawah:
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*expire_cache.*")
 
 import streamlit as st
 from PIL import Image
